@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>个人中心</title>
+    <link rel="icon" href="tubiao.png" type="image/png">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f4f4f4;
+        }
+        /* 个人中心模块 */
+        .container {
+            max-width: 500px;
+            margin: 10px auto;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        label {
+            margin-top: 10px;
+        }
+        input[type="text"], input[type="email"], input[type="password"] {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #5cb85c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        button:hover {
+            background: #4cae4c;
+        }
+        /* 底部菜单栏 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: #333;
+            padding: 20px 0;
+            display: flex;
+            justify-content: space-around;
+            font-size: 20px;
+        }
+        .nav-item {
+            flex: 1;
+            text-align: center;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .nav-item.active {
+            color: #5cb85c;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        /* 返回主页按钮 */
+        .return-home {
+            position: relative;
+            top: 50px;
+            left: 50%; /* 将左边边缘移动到视口的50%位置 */
+            transform: translate(-50%, -50%); /* 将按钮向左和向上移动自身宽度和高度的50%来居中 */
+            padding: 10px 20px;
+            background: #5cb85c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .return-home:hover {
+            background: #4cae4c;
+        }
+        .avatar-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+        /*下拉菜单*/
+        .dropdown-menu a {
+            width: 65px;
+            display: block;
+            padding: 10px;
+            color: #333;
+            text-decoration: none;
+        }
+        .dropdown-menu a:hover {
+            background: #f4f4f4;
+        }
+        .user-profile, .logout-button {
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+        }
+        .user-profile:hover, .logout-button:hover {
+            text-decoration: underline;
+        }
+        .warn-text{
+            color: red;
+        }
+    </style>
+</head>
+<body>
+        <div class="avatar-container" onclick="toggleDropdown()">
+        <img src="../img/defaultuser.png" alt="User Avatar" class="user-avatar">
+        <div class="dropdown-menu" id="dropdownMenu">
+            <a href="login.html" class="logout-button">退出登录</a>
+        </div>
+    </div>
+    <div class="container">
+        <!--基本信息-->
+        <div id="basicInfo" class="tab-content active">
+            <h2>个人中心</h2>
+            <form id="profileForm">
+                <label for="userId">账号</label>
+                <input type="text" id="userId" name="userId" value="" readonly>
+
+                <label for="userType">账号类型（有误请联系管理员admin@uestc.com）</label>
+                <input type="text" id="userType" name="userType" value="" readonly>
+
+                <label for="username">用户名</label>
+                <input type="text" id="username" name="username" value="">
+
+                <label for="email">邮箱</label>
+                <input type="email" id="email" name="email" value="">
+
+                <button type="submit">保存更改</button>
+            </form>
+        </div>
+
+        <!--修改密码-->
+        <div id="changePassword" class="tab-content">
+            <h2>修改密码</h2>
+            <p class="warn-text">*密码需要包括数字、大写字母、小写字母至少各一个，且至少8位，至多20位</p>
+            <form id="passwordForm">
+                <label for="originPassword">原密码</label>
+                <input type="password" id="originPassword" name="originPassword" value="">
+
+                <label for="newPassword">新密码</label>
+                <input type="password" id="newPassword" name="newPassword" value="">
+
+                <label for="confirmPassword">确认密码</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" value="">
+
+                <button type="submit">修改</button>
+            </form>
+        </div>
+    </div>
+    <button class="return-home" onclick="returnHome()">返回主页</button>
+
+    </div>
+    <div class="bottom-nav">
+        <a href="#basicInfo" class="nav-item active">基本信息</a>
+        <a href="#changePassword" class="nav-item">修改密码</a>
+    </div>
+
+    <!--登录控制-->
+    <script>
+        url = 'http://localhost:8000';
+        userId = localStorage.getItem('userId');
+
+        if (userId == -1) {
+            alert("当前未登录，请登录");
+            window.location.href = "login.html";
+        }
+
+        window.onload = fresh();
+
+        var loginTime = localStorage.getItem("loginTime");
+
+        function fresh() {
+            let curTime = new Date().getTime();
+            if (curTime - loginTime >= 1000 * 60 * 30) { // 登录时效30min
+                logout(true);
+            }
+            setTimeout(fresh, 2000); // 2s检查登录状态
+        }
+
+        function logout(isTimeOut) {
+            if (isTimeOut) {
+                alert("登录失效，请重新登录");
+            }
+            console.log(`用户${userId}登录超时`);
+            window.location.href = "login.html";
+        }
+    </script>
+
+    <!--界面-->
+    <script>
+        // 返回主页
+        function returnHome() {
+            window.location.href="index.html";
+        }
+
+        // 菜单栏事件
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const tabId = this.getAttribute('href').substring(1);
+                document.querySelectorAll('.tab-content').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                document.querySelectorAll('.nav-item').forEach(nav => {
+                    nav.classList.remove('active');
+                });
+                document.getElementById(tabId).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+
+        // 下拉菜单
+        function toggleDropdown() {
+            const dropdown = document.getElementById('dropdownMenu');
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        }
+    
+        window.onclick = function(event) {
+            if (!event.target.matches('.avatar-container') && !event.target.matches('.user-avatar')) {
+                const dropdown = document.getElementById('dropdownMenu');
+                if (dropdown.style.display === 'block') {
+                    dropdown.style.display = 'none';
+                }
+            }
+        }
+
+    </script>
+    
+    <!--基本信息-->
+    <script>
+        // 查询个人信息
+        userId = localStorage.getItem('userId');
+        queryProfile(userId);
+
+        function queryProfile(userId) {
+            let json = JSON.stringify({"userId": userId});
+            // 发送请求
+            fetch(`${url}/queryUser`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: json
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 处理后端返回的数据
+                displayProfile(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("服务器连接失败");
+            });
+        }
+
+        function displayProfile(data) {
+            // userId userType username email
+            var userType = data.userType;
+            var username = data.username;
+            var email = data.email;
+
+            document.getElementById("userId").value = userId;
+            document.getElementById("userType").value = userType;
+            document.getElementById("username").value = username;
+            document.getElementById("email").value = email;
+        }
+
+        // 保存更改
+        document.getElementById('profileForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const userType = document.getElementById('userType').value;
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+
+            let json = JSON.stringify({
+                "userId": userId,
+                "userType": userType,
+                "username": username,
+                "email": email
+            });
+
+            // 发送请求更新用户信息
+            fetch(`${url}/submitUser`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: json
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 处理后端返回的数据
+                var status = data.status;
+                if (status == "success") {
+                    console.log(`用户${userId}更新个人信息`);
+                    alert('更改已保存');
+                } else alert('更改失败');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("服务器连接失败");
+            });
+        });
+    </script>
+
+    <!--修改密码-->
+    <script>
+        document.getElementById('passwordForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const originPassword = document.getElementById('originPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (!checkPassword(newPassword)) {
+                alert("新密码强度不足，请修改");
+                return;
+            }
+
+            if (newPassword != confirmPassword) {
+                alert("新密码与确认密码不一致");
+                return;
+            }
+
+            let json = JSON.stringify({"originPassword": originPassword, "newPassword": newPassword});
+            // 发送请求修改密码
+            fetch(`${url}/changePassword`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: json
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 处理后端返回的数据
+                var status = data.status;
+                if (status == "success") {
+                    changeSuccess();
+                } else if (status == "passwordWrong") alert("原密码错误");
+                else alert('更改失败');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("服务器连接失败");
+            });
+        });
+
+        function changeSuccess() {
+            console.log(`用户${userId}修改密码`);
+            alert('修改成功');
+
+            // 清空文本框
+            document.getElementById('originPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+
+            // 退出登录
+            logout(true);
+        }
+
+        function checkPassword(password) {
+            let num = 0, big = 0, little = 0;
+
+            if (password.length < 8) return false;
+
+            for (let i = 0; i < password.length; i++) {
+                let c = password[i];
+                if (c >= '0' && c <= '9') num++;
+                if (c >= 'A' && c <= 'Z') big++;
+                if (c >= 'a' && c <= 'z') little++;
+            }
+            if (!num || !big || !little) return false;
+            return true;
+        }
+    </script>
+</body>
+</html>

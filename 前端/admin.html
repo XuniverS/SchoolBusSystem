@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>个人中心</title>
+    <link rel="icon" href="tubiao.png" type="image/png">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f4f4f4;
+        }
+        /* 管理员页面模块 */
+        .container {
+            max-width: 500px;
+            margin: 10px auto;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        label {
+            margin-top: 10px;
+        }
+        input[type="text"], input[type="email"], input[type="password"] {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #5cb85c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        button:hover {
+            background: #4cae4c;
+        }
+        /* 底部菜单栏 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: #333;
+            padding: 20px 0;
+            display: flex;
+            justify-content: space-around;
+            font-size: 20px;
+        }
+        .nav-item {
+            flex: 1;
+            text-align: center;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .nav-item.active {
+            color: #5cb85c;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        /* 返回主页按钮 */
+        .return-home {
+            position: relative;
+            top: 50px;
+            left: 50%; /* 将左边边缘移动到视口的50%位置 */
+            transform: translate(-50%, -50%); /* 将按钮向左和向上移动自身宽度和高度的50%来居中 */
+            padding: 10px 20px;
+            background: #5cb85c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .return-home:hover {
+            background: #4cae4c;
+        }
+        .avatar-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+        /*下拉菜单*/
+        .dropdown-menu a {
+            width: 65px;
+            display: block;
+            padding: 10px;
+            color: #333;
+            text-decoration: none;
+        }
+        .dropdown-menu a:hover {
+            background: #f4f4f4;
+        }
+        .user-profile, .logout-button {
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+        }
+        .user-profile:hover, .logout-button:hover {
+            text-decoration: underline;
+        }
+        .warn-text{
+            color: red;
+        }
+        /* 班车卡片 */
+        .bus-schedule-card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        .bus-schedule-card h4 {
+            margin: 0;
+            color: #333;
+        }
+        .bus-schedule-card p {
+            margin: 5px 0;
+            color: #666;
+        }
+        .bus-schedule-card button {
+            padding: 8px 15px;
+            background: #5cb85c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .bus-schedule-card button:hover {
+            background: #4cae4c;
+        }
+        /* 模窗 */
+        .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgb(0,0,0);
+        background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+        display: flex; /* 使用flex布局 */
+        flex-direction: column; /*垂直布局*/
+        justify-content: center; /* 水平居中 */
+        align-items: center; /*垂直居中*/
+
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        height: 200px;
+        width: 300px;
+        }
+
+        .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+        }
+        .confirm-buttons {
+        display: flex;
+        margin-top: 30px;
+        }
+        .confirm-button {
+        display: flex; /* 使用flex布局 */
+        justify-content: center; /*水平居中*/
+        /* align-items: center; 垂直居中 */
+        height: 40px;
+        width: 80px;
+        margin: 20px;
+        }
+        .modal-text {
+        display: flex;
+        justify-content: center;
+        /* height: 50px; */
+        width: 100%;
+        }
+        .initButton {
+        background-color: orange;
+        }
+        #delete-button.delete-button {
+        background: crimson;
+        }
+    </style>
+</head>
+<body>
+    <div class="avatar-container" onclick="toggleDropdown()">
+        <img src="../img/defaultuser.png" alt="User Avatar" class="user-avatar">
+        <div class="dropdown-menu" id="dropdownMenu">
+            <a href="login.html" class="logout-button">退出登录</a>
+        </div>
+    </div>
+    <div class="container">
+        <!--班车添加-->
+        <div id="addBus" class="tab-content active">
+            <h2>班车添加</h2>
+            <form id="busForm">
+                <label for="origin">出发地</label>
+                <input type="text" id="origin" name="origin" value="" required>
+
+                <label for="destination">目的地</label>
+                <input type="text" id="destination" name="destination" value="" required>
+
+                <label for="busType">班车类型（师生车/教职工车）</label>
+                <input type="text" id="busType" name="busType" value="" required>
+
+                <label for="date">日期</label>
+                <input type="date" id="date" name="date" value="" required>
+
+                <label for="time">时间</label>
+                <input type="time" id="time" name="time" value="" required>
+
+                <label for="plate">车牌</label>
+                <input type="text" id="plate" name="plate" value="" required>
+                
+                <label for="seats">总座位数</label>
+                <input type="text" id="seats" name="seats" value="" required>
+
+                <button type="submit">添加</button>
+            </form>
+        </div>
+
+        <!--班车管理-->
+        <div id="busManage" class="tab-content">
+            <h2>班车管理</h2>
+            <h4 class="warn-text">*有用户预约的班车无法删除。若需修改班车信息请删除再添加。</h4>
+            <div class="bus-schedule-cards">
+                <!-- 班次信息将在这里动态生成 -->
+            </div>
+        </div>
+
+        <!--用户管理-->
+        <div id="userManage" class="tab-content">
+            <h2>修改密码</h2>
+            <p class="warn-text">*重置用户密码后，用户密码为初始密码</p>
+            <form id="userForm">
+                <label for="userId">用户账号</label>
+                <input type="text" id="userId" name="userId" value="" required>
+
+                <label for="userType">用户类型（仅限学生/教师）</label>
+                <input type="text" id="userType" name="userType" value="">
+
+                <label for="username">用户名</label>
+                <input type="text" id="username" name="username" value="" readonly>
+
+                <label for="email">用户邮箱</label>
+                <input type="text" id="email" name="email" value="" readonly>
+
+                <button type="button" onclick="queryUser()">查询用户信息</button type="button">
+                <button type="submit">保存更改</button>
+                <button class = "initButton" type="button" onclick="initPassword()">重置该用户密码</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 底部菜单栏 -->
+    <div class="bottom-nav">
+        <a href="#addBus" class="nav-item active">班车添加</a>
+        <a href="#busManage" class="nav-item" onclick="querySchedules()">班车管理</a>
+        <a href="#userManage" class="nav-item">用户管理</a>
+    </div>
+
+    <!-- 模窗 -->
+    <div id="myModal" class="modal">
+        <!-- Modal content -->
+        <div class="modal-content">
+            <div class = 'modal-text'>
+                <h3 id = "confirmInfo">展示告警信息</h3>
+            </div>
+            <div class = 'confirm-buttons'>
+                <button class = "confirm-button" onclick="confirm()">确认</button>
+                <button class = "confirm-button" onclick="cancel()">取消</button>
+            </div>
+
+        </div>
+    </div>
+
+    <!--登录控制-->
+    <script>
+        url = 'http://localhost:8000';
+        userId = localStorage.getItem('userId');
+
+        if (userId == -1) {
+            alert("当前未登录，请登录");
+            window.location.href = "login.html";
+        }
+    </script>
+
+    <!-- 页面控制 -->
+    <script>
+        // 菜单栏事件
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const tabId = this.getAttribute('href').substring(1);
+                document.querySelectorAll('.tab-content').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                document.querySelectorAll('.nav-item').forEach(nav => {
+                    nav.classList.remove('active');
+                });
+                document.getElementById(tabId).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+
+        // 下拉菜单
+        function toggleDropdown() {
+            const dropdown = document.getElementById('dropdownMenu');
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        }
+    
+        window.onclick = function(event) {
+            if (!event.target.matches('.avatar-container') && !event.target.matches('.user-avatar')) {
+                const dropdown = document.getElementById('dropdownMenu');
+                if (dropdown.style.display === 'block') {
+                    dropdown.style.display = 'none';
+                }
+            }
+        }
+    </script>
+
+    <!--班车添加-->
+    <script>
+        document.getElementById('busForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const origin = document.getElementById('origin').value;
+            const destination = document.getElementById('destination').value;
+            const busType = document.getElementById('busType').value;
+            const date = document.getElementById('date').value;
+            const time = document.getElementById('time').value;
+            const plate = document.getElementById('plate').value;
+            const seats = document.getElementById('seats').value;
+
+            if (busType != '师生车' && busType != '教职工车') {
+                alert("班车类型错误！仅限为师生车或教职工车");
+                return;
+            }
+
+            // 验证时间
+            {
+                let busTime = new Date(date + " " + time);
+                let now = new Date();
+                if (busTime - now < 0) {
+                    alert("不能添加过去的班车");
+                    return;
+                }
+            }
+
+            let json = JSON.stringify({
+                "origin": origin,
+                'destination': destination,
+                'busType': busType,
+                'date': date,
+                'time': time,
+                'plate': plate,
+                'seats': seats
+            });
+            console.log(json);
+            // 发送请求
+            fetch(`${url}/addBus`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: json
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 处理后端返回的数据
+                var status = data.status;
+                if (status == "success") {
+                    alert("添加成功");
+                } else alert("添加失败");
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("服务器连接失败");
+            });
+        });
+    </script>
+    
+    <!--班车管理-->
+    <script>
+        // 查询所有班次
+        timeId = -1;
+
+        function querySchedules() {
+            // 清空定时器
+            if (timeId != -1) {
+                clearTimeout(timeId);
+                timeId = -1;
+            }
+            // 发送请求到后端
+            let json = JSON.stringify({'date': 'any', 'userType': 'admin'});
+            console.log(`用户${userId} 查询班车`);
+            fetch(`${url}/queryAll`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: json
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 处理后端返回的数据
+                displaySchedules(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("服务器连接失败");
+            });
+            timeId = setTimeout(querySchedules, 3000, date); // 每3s重新查询一次（主要为了更新余座）
+        }
+
+        // 展示班次信息
+        function displaySchedules(busSchedules) {
+            const busSchedulesContainer = document.querySelector('.bus-schedule-cards');
+            busSchedulesContainer.innerHTML = ''; // 清空现有班次信息
+    
+            var cnt = 0;
+
+            busSchedules.forEach(schedule => {
+                cnt++;
+                const scheduleCard = document.createElement('div');
+                scheduleCard.className = 'bus-schedule-card';
+                scheduleCard.innerHTML = `
+                    <h3>${schedule.busType}</h3>
+                    <p>出发地：${schedule.origin}</p>
+                    <p>目的地：${schedule.destination}</p>
+                    <p>出发时间：${schedule.time}</p>
+                    <p>余座：${schedule.seats}</p>
+                    <p>车牌：${schedule.plate}</p>
+                    <button id = "delete-button" class = "delete-button" onclick="deleteBus(${schedule.busId})" >删除</button>
+                `;
+                busSchedulesContainer.appendChild(scheduleCard);
+            });
+
+            if (cnt == 0) {
+                const scheduleCard = document.createElement('div');
+                scheduleCard.innerHTML = `
+                    <p>没有可预约班次</p>
+                `;
+                busSchedulesContainer.appendChild(scheduleCard);
+            }
+        }
+
+
+        function deleteBus(busId) {
+            // 删除班车
+            busId = String(busId);
+            let json = JSON.stringify({'busId': busId});
+            console.log(`用户${userId} 查询班车`);
+            fetch(`${url}/deleteBus`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: json
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 处理后端返回的数据
+                let s = data.status;
+                if (s == 'success') {
+                    alert("删除成功");
+                    querySchedules();
+                }
+                else if (s == 'booked') alert("有用户预定了该班车，不可删除");
+                else alert("删除失败");
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("服务器连接失败");
+            });
+        }
+    </script>
+
+    <!--用户管理-->
+    <script>
+        // 查询用户信息
+        function queryUser() {
+            const curUserId = document.getElementById('userId').value;
+
+            let json = JSON.stringify({"userId": curUserId});
+            // 发送请求查询用户信息
+            fetch(`${url}/queryUser`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: json
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 处理后端返回的数据
+                var status = data.status;
+                if (status == "success") {
+                    document.getElementById('userType').value = data.userType;
+                    document.getElementById('username').value = data.username;
+                    document.getElementById('email').value = data.email;
+                } else if (status == 'inexist') alert("没有查询到该用户");
+                else alert("查询失败");
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("服务器连接失败");
+            });
+        }
+
+        // 提交更改
+        document.getElementById('userForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const curUserId = document.getElementById('userId').value;
+            const userType = document.getElementById('userType').value;
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            
+            if (userType != '学生' && userType != '教师') {
+                alert('用户类型错误！仅限为学生或教师');
+                return;
+            }
+
+            let json = JSON.stringify({
+                "userId": userId,
+                "userType": userType,
+                "username": username,
+                "email": email
+            });
+
+            // 发送请求修改用户信息
+            fetch(`${url}/submitUser`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: json
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 处理后端返回的数据
+                var status = data.status;
+                if (status == "success") {
+                    console.log(`管理员更新用户${userId}个人信息`);
+                    alert('更改已保存');
+                } else alert('更改失败');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("服务器连接失败");
+            });
+        });
+
+        function initPassword() {
+            const curUserId = document.getElementById('userId').value;
+            
+            if (curUserId == '') {
+                alert("请输入用户id");
+                return;
+            }
+
+            confirmInfo = document.getElementById("confirmInfo");
+            confirmInfo.innerHTML = `确认重置用户${curUserId}的密码吗？`
+
+            // 获取模态框元素
+            modal = document.getElementById("myModal");
+
+            modal.style.display = "block";
+
+            // 在用户点击模态框外部时，关闭模态框
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            }
+        }
+
+        // 确认按钮
+        function confirm() {
+            const curUserId = document.getElementById('userId').value;
+
+            let json = JSON.stringify({"userId": curUserId});
+            // 发送请求查询用户信息
+            fetch(`${url}/initPassword`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: json
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 处理后端返回的数据
+                var status = data.status;
+                if (status == "success") alert('重置成功');
+                else if(status == 'inexist') alert("该用户不存在");
+                else alert('重置失败');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("服务器连接失败");
+            });
+            modal.style.display = "none";
+        }
+        
+        // 取消按钮
+        function cancel() {
+            modal.style.display = "none";
+        }
+    </script>
+</body>
+</html>

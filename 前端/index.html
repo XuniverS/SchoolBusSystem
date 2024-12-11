@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>班车预约系统</title>
+    <link rel="icon" href="tubiao.png" type="image/png">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f4f4f4;
+        }
+        /*预约模块*/
+        .container {
+            max-width: 800px;
+            margin: 10px auto;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        label {
+            margin-top: 10px;
+        }
+        input[type="text"], input[type="date"], select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #5cb85c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        button:hover {
+            background: #4cae4c;
+        }
+        .avatar-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+        /*余座显示为红色*/
+        #seatsInfo.warn-text{
+            color: red;
+        }
+        /*下拉菜单*/
+        .dropdown-menu a {
+            width: 65px;
+            display: block;
+            padding: 10px;
+            color: #333;
+            text-decoration: none;
+        }
+        .dropdown-menu a:hover {
+            background: #f4f4f4;
+        }
+        .user-profile, .logout-button {
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+        }
+        .user-profile:hover, .logout-button:hover {
+            text-decoration: underline;
+        }
+        /*底部菜单栏*/
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: #333;
+            padding: 20px 0;
+            display: flex;
+            justify-content: space-around;
+            font-size: 20px;
+        }
+        .nav-item {
+            flex: 1;
+            text-align: center;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .nav-item.active {
+            color: #5cb85c;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .bus-schedule-card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        .bus-schedule-card h4 {
+            margin: 0;
+            color: #333;
+        }
+        .bus-schedule-card p {
+            margin: 5px 0;
+            color: #666;
+        }
+        .bus-schedule-card button {
+            padding: 8px 15px;
+            background: #5cb85c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .bus-schedule-card button:hover {
+            background: #4cae4c;
+        }
+        .date-cards-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 20px;
+        }
+        /*日期卡片*/
+        .date-card {
+            padding: 10px;
+            height: 50px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            background: #fff;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        .date-card.selected {
+            background: #5cb85c;
+            color: white;
+        }
+        /* 模窗 */
+        .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgb(0,0,0);
+        background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+        display: flex; /* 使用flex布局 */
+        flex-direction: column;
+        justify-content: center; /* 水平居中 */
+        align-items: center; /* 垂直居中 */
+
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        height: 15%;
+        width: 300px;
+        }
+
+        .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+        }
+        .pay-button {
+        display: flex; /* 使用flex布局 */
+        justify-content: center; /* 水平居中 */
+        align-items: center; /*垂直居中*/
+        margin: 20px;
+        }
+        .buttons {
+        display: flex;
+        }
+        .pay-text {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        /* height: 50px; */
+        width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <!--右上角下拉菜单-->
+    <div class="avatar-container" onclick="toggleDropdown()">
+        <img src="../img/defaultuser.png" alt="User Avatar" class="user-avatar">
+        <div class="dropdown-menu" id="dropdownMenu">
+            <a href="profile.html" class="user-profile">个人中心</a>
+            <a class="logout-button" onclick = "logout(false)">退出登录</a>
+        </div>
+    </div>
+
+    <!--卡片展示-->
+    <div class="container">
+        <!--预约模块-->
+        <div id="bookingTab" class="tab-content active">
+            <h2>可预约班次</h2>
+            <div class="container">
+                <div id="dateCards" class="date-cards-container">
+                    <!-- 日期卡片将在这里动态生成 -->
+                </div>
+                <!-- 其他内容 -->
+            </div>
+            <div class="bus-schedule-cards">
+                <!-- 班次信息将在这里动态生成 -->
+            </div>
+        </div>
+
+        <!--已预约模块-->
+        <div id="bookedTab" class="tab-content">
+            <h3>已预约班次</h3>
+            <div class="bus-booked-cards">
+                <!-- 已预约班次信息将在这里动态生成 -->
+            </div>
+        </div>
+
+        <!--已完成模块-->
+        <div id="finishedTab" class="tab-content">
+            <h3>历史订单</h3>
+            <div class="order-cards">
+                <!-- 历史订单将在这里动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 模窗 -->
+    <div id="myModal" class="modal">
+        <!-- Modal content -->
+        <div class="modal-content">
+            <div class = 'pay-text'>
+                <h3>模拟支付</h3>
+            </div>
+            <div class = 'buttons'>
+                <button class = "pay-button" onclick="payed()">支付</button>
+                <button class = "pay-button" onclick="unpay()">返回</button>
+            </div>
+            
+        </div>
+    </div>
+
+    <!--菜单栏-->
+    <div class="bottom-nav">
+        <a href="#bookingTab" class="nav-item active">预约</a>
+        <a href="#bookedTab" class="nav-item" onclick="queryBooked()">已预约</a>
+        <a href="#finishedTab" class="nav-item" onclick="queryFinished()">历史订单</a>
+    </div>
+    <p></p>
+
+    <!--登录控制-->
+    <script>
+        url = 'http://localhost:8000';
+        userId = String(localStorage.getItem('userId'));
+        userType = localStorage.getItem('userType');
+
+        if (userId == -1) {
+            alert("当前未登录，请登录");
+            window.location.href = "login.html";
+        }
+
+        window.onload = fresh();
+
+        var loginTime = localStorage.getItem("loginTime");
+
+        function fresh() {
+            // 检查登录状态
+            let curTime = new Date().getTime();
+            if (curTime - loginTime >= 1000 * 60 * 30) { // 登录时效30min
+                logout(true);
+            }
+
+            // 更新查询数据
+
+            setTimeout(fresh, 2000); // 2s刷新一次
+        }
+
+        function logout(isTimeOut) {
+            clearTimeout(timeId);
+            if (isTimeOut) {
+                console.log(`用户${userId}登录超时`);
+                alert("登录失效，请重新登录");
+            } else console.log(`用户${userId}退出登录`);
+            window.location.href = "login.html";
+        }
+    </script>
+
+    <!--界面-->
+    <script>
+        // 菜单栏事件
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const tabId = this.getAttribute('href').substring(1);
+                document.querySelectorAll('.tab-content').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                document.querySelectorAll('.nav-item').forEach(nav => {
+                    nav.classList.remove('active');
+                });
+                document.getElementById(tabId).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        // 下拉菜单
+        function toggleDropdown() {
+            const dropdown = document.getElementById('dropdownMenu');
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        }
+
+        window.onclick = function(event) {
+            if (!event.target.matches('.avatar-container') && !event.target.matches('.user-avatar')) {
+                const dropdown = document.getElementById('dropdownMenu');
+                if (dropdown.style.display === 'block') {
+                    dropdown.style.display = 'none';
+                }
+            }
+        }
+    </script>
+
+    <!--预约模块-->
+    <script>
+        let selectedDateCard = null; // 添加一个变量来跟踪当前选中的日期卡片
+        busId = -1; // 当前选中班次
+
+        // 获取今天的日期并创建未来一周的日期数组
+        const today = new Date();
+        const dates = [];
+        for (let i = 0; i < 7; i++) {
+            const date = new Date(today);
+            date.setDate(today.getDate() + i);
+            dates.push(date);
+        }
+
+        var timeId = -1;
+
+        // 生成日期卡片
+        function generateDateCards(dates) {
+            const dateCardsContainer = document.getElementById('dateCards');
+            dateCardsContainer.innerHTML = ''; // 清空现有班次
+    
+            dates.forEach(date => {
+                const card = document.createElement('div');
+                card.className = 'date-card';
+                card.innerText = date.toLocaleDateString();
+                card.onclick = function() {
+                    // 清空循环查询定时器，停止循环
+                    if (timeId != -1) {
+                        clearTimeout(timeId);
+                        timeId = -1;
+                    }
+                    // 如果之前有选中的日期卡片，移除其选中状态
+                    if (selectedDateCard) {
+                        selectedDateCard.classList.remove('selected');
+                    }
+                    // 添加选中状态到当前点击的日期卡片
+                    card.classList.add('selected');
+                    selectedDateCard = card; // 更新选中的日期卡片
+                    querySchedules(formatDate(date));
+                };
+                dateCardsContainer.appendChild(card);
+            });
+        }
+    
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = (date.getMonth() + 1).toString().padStart(2, '0'); // 月份从0开始，所以加1
+            const day = date.getDate().toString().padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // 初始化日期卡片
+        generateDateCards(dates);
+    
+        // 默认选中第一天并展示信息
+        const defaultSelectedDate = formatDate(dates[0]);
+        if (document.querySelector('.date-card')) {
+            document.querySelector('.date-card').classList.add('selected');
+            selectedDateCard = document.querySelector('.date-card');
+        }
+        querySchedules(defaultSelectedDate);
+        
+        // 根据日期查询班次
+        function querySchedules(date) {
+            // 发送请求到后端
+            let json = JSON.stringify({'date': encodeURIComponent(date), 'userType': userType});
+            console.log(`用户${userId} 查询 ${date} 的班车`);
+            fetch(`${url}/queryAll`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: json
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 处理后端返回的数据
+                displaySchedules(data, date);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("服务器连接失败");
+            });
+            timeId = setTimeout(querySchedules, 3000, date); // 每3s重新查询一次（主要为了更新余座）
+        }
+    
+        // 展示班次信息
+        function displaySchedules(busSchedules, date) {
+            const busSchedulesContainer = document.querySelector('.bus-schedule-cards');
+            busSchedulesContainer.innerHTML = ''; // 清空现有班次信息
+    
+            var cnt = 0;
+
+            busSchedules.forEach(schedule => {
+                
+                let busTime = new Date(date + " " + schedule.time);
+                let now = new Date();
+                if (busTime - now < 0) ; // 已经过了出发时间
+                else {
+                    cnt++;
+                    const scheduleCard = document.createElement('div');
+                    scheduleCard.className = 'bus-schedule-card';
+                    scheduleCard.innerHTML = `
+                        <h3>${schedule.busType}</h3>
+                        <p>出发地：${schedule.origin}</p>
+                        <p>目的地：${schedule.destination}</p>
+                        <p>出发时间：${schedule.time}</p>
+                        <p id="seatsInfo" class="warn-text">余座：${schedule.seats}</p>
+                        <button onclick="book(${schedule.busId})">预约</button>
+                    `;
+                    busSchedulesContainer.appendChild(scheduleCard);
+                }
+            });
+
+            if (cnt == 0) {
+                const scheduleCard = document.createElement('div');
+                scheduleCard.innerHTML = `
+                    <p>当天没有可预约班次</p>
+                `;
+                busSchedulesContainer.appendChild(scheduleCard);
+            }
+        }
+
+        // 用户发起预约
+        function book(curBusId) {
+            busId = curBusId;
+            busId = String(busId); // 确保为字符串类型
+            // 点击预约按钮尝试预约，查看状态是否正常
+            let json = JSON.stringify({'userId': userId, 'busId': busId});
+            console.log(`用户${userId} 预约 班车${busId}`);
+            fetch(`${url}/book`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: json
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 处理后端返回的数据
+                let s = data.status;
+                if (s == 'booked') {
+                    alert("重复预约该班次");
+                }
+                else if (s == 'full') {
+                    alert("所选班次没有剩余座位，请重新选择");
+                } else if (s == 'available') { // 可以预约，打开支付界面
+                    pay();
+                } else {
+                    alert("预约失败，请重试");
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("服务器连接失败");
+            });
+        }
+
+        function pay() {
+            // 获取模态框元素
+            modal = document.getElementById("myModal");
+
+            modal.style.display = "block";
+
+            // 在用户点击模态框外部时，关闭模态框
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            }
+        }
+
+        // 点击支付按钮模拟支付
+        function payed() {
+            let json = JSON.stringify({'userId': userId, 'busId': busId});
+            console.log(`用户${userId} 成功预约 班车${busId}`);
+            fetch(`${url}/payed`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: json
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 处理后端返回的数据
+                let s = data.status;
+                if (s == 'success') {
+                    alert("预约成功");
+                } else {
+                    alert("预约失败，请重试");
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("服务器连接失败");
+            });
+            modal.style.display = 'none';
+        }
+
+        // 点击返回按钮
+        function unpay() {
+            modal.style.display = 'none';
+        }
+
+        
+    </script>
+
+    <!--已预约模块-->
+    <script>
+        // 查询已预约班车
+        function queryBooked() {
+            // 发送请求到后端查询班次
+            let json = JSON.stringify({'userId': userId});
+            console.log(`用户${userId} 查询已预约班车`);
+            fetch(`${url}/queryBooked`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: json
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 处理后端返回的数据
+                displayBooked(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("服务器连接失败");
+            });
+        }
+    
+        // 展示已预约班次信息
+        function displayBooked(busSchedules) {
+            const busSchedulesContainer = document.querySelector('.bus-booked-cards');
+            busSchedulesContainer.innerHTML = ''; // 清空现有班次信息
+            
+            var cnt = 0;
+
+            busSchedules.forEach(schedule => {
+                cnt++;
+                const scheduleCard = document.createElement('div');
+                scheduleCard.className = 'bus-schedule-card';
+                scheduleCard.innerHTML = `
+                    <h3>${schedule.busType}</h3>
+                    <p>出发地：${schedule.origin}</p>
+                    <p>目的地：${schedule.destination}</p>
+                    <p>出发时间：${schedule.time}</p>
+                    <p>车牌：${schedule.plate}</p>
+                    <button onclick="unbook(${schedule.busId})">取消预约</button>
+                `;
+                busSchedulesContainer.appendChild(scheduleCard);
+            });
+            
+            // 没有已预约班车
+            if (cnt == 0) {
+                const scheduleCard = document.createElement('div');
+                scheduleCard.innerHTML = `
+                    <p>当前没有已预约班车</p>
+                `;
+                busSchedulesContainer.appendChild(scheduleCard);
+            }
+        }
+
+        // 取消预约
+        function unbook(busId) {
+            // 逻辑代码
+            busId = String(busId);
+            let json = JSON.stringify({'userId': userId, 'busId': busId});
+            console.log(`用户${userId} 取消预约 班车${busId}`);
+            fetch(`${url}/unbook`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: json
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 处理后端返回的数据
+                let s = data.status;
+                if (s == 'success') {
+                    alert("取消预约成功");
+                    queryBooked();
+                } else {
+                    alert("取消预约失败，请重试");
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("服务器连接失败");
+            });
+        }
+    </script>
+
+    <!--历史订单模块-->
+    <script>
+        // 查询历史订单
+        function queryFinished() {
+            // 发送请求到后端
+            let json = JSON.stringify({'userId': userId});
+            console.log(`用户${userId} 查询历史订单`);
+            fetch(`${url}/queryFinished`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: json
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 处理后端返回的数据
+                displayFinished(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("服务器连接失败");
+            });
+        }
+
+        // 展示历史订单
+        function displayFinished(orders) {
+            const busSchedulesContainer = document.querySelector('.order-cards');
+            busSchedulesContainer.innerHTML = ''; // 清空现有班次信息
+            
+            var cnt = 0;
+
+            orders.forEach(order => {
+                cnt++;
+                const orderCard = document.createElement('div');
+                orderCard.className = 'bus-schedule-card';
+                orderCard.innerHTML = `
+                    <h3>${order.busType}</h3>
+                    <h4>${order.status == 'finished' ? "已完成" : "已取消"}</h4>
+                    <br>
+                    <p>出发地：${order.origin}</p>
+                    <p>目的地：${order.destination}</p>
+                    <p>出发时间：${order.time}</p>
+                    <p>车牌：${order.plate}</p>
+                    <p>日期：${order.date}</p>
+                `;
+                busSchedulesContainer.appendChild(orderCard);
+            });
+
+            
+            // 没有历史订单
+            if (cnt == 0) {
+                const scheduleCard = document.createElement('div');
+                scheduleCard.innerHTML = `
+                    <p>没有历史记录</p>
+                `;
+                busSchedulesContainer.appendChild(orderCard);
+            }
+        }
+    </script>
+</body>
