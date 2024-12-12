@@ -8,9 +8,11 @@ import (
 
 func main() {
 	router := gin.Default()
-	// 注册中间件，例如跨域中间件
+
 	router.Use(cors.Default())
-	back.RegisterloginModule(router)
+	router.Static("", "./front")
+	back.RegisterUserModule(router)
+	back.RegisterProfileModule(router)
 
 	router.Run(":8000")
 

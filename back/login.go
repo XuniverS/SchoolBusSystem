@@ -3,10 +3,11 @@ package back
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
 	"net/http"
 	"time"
+
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 
 	"github.com/gin-gonic/gin"
 )
@@ -22,7 +23,7 @@ type User struct {
 }
 
 func RegisterUserModule(router *gin.Engine) {
-	router.Static("", "./front")
+
 	userRouters := router.Group("/user")
 	{
 		userRouters.POST("/login", userLogin)
@@ -74,15 +75,28 @@ func userSignIn(c *gin.Context) {
 	user.userType = c.Query("usertype")
 	user.userName = c.Query("username")
 	user.password = c.Query("password")
-	user.email 	  = c.Query("email")
+	user.email = c.Query("email")
 
-	if user.userName == "" || user.password == "" || user.email == ""{
+	if user.userName == "" || user.password == "" || user.email == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "用户名、密码、邮箱都不能为空"})
 		return
 	}
+	db, err := gorm.Open(mysql.New(mysql.Config{
+		DSN:                       "root:C0137yx.@tcp(127.0.0.1:3306)/BusBookingSystem",
+		SkipInitializeWithVersion: true,
+	}), &gorm.Config{})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "数据库链接失败"})
+		return
+	}
+	if insertUser(db, &user) == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "插入用户失败"})
+	}
 
-
-	c.JSON(http.StatusOK, gin.H{"message": "登录成功"})
+	c.JSON(http.StatusOK, gin.H{"message": "用户注册成功"})
 }
 
-func changePasswd
+func insertUser(db *gorm.DB, user *User) error {
+	result := db.Create(user)
+	return result.Error
+}

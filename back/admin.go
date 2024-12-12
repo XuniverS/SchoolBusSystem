@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,19 +20,11 @@ type Bus struct {
 	Seats       int       `json:"seats"`
 }
 
-func SetupRoutes() *gin.Engine {
-	router := gin.Default()
-
-	router.Use(cors.Default())
-
-	router.Static("", "./front")
-
+func RegisterSetupRoutes(router *gin.Engine) {
 	busRoutes := router.Group("/bus")
 	{
 		busRoutes.POST("/addBus", addBus)
 	}
-
-	return router
 }
 
 func addBus(c *gin.Context) {
