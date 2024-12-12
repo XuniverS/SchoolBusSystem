@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>班车预约系统</title>
-    <link rel="icon" href="tubiao.png" type="image/png">
+    <link rel="icon" href="../img/tubiao.png" type="image/png">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -301,7 +301,7 @@
 
     <!--登录控制-->
     <script>
-        url = 'http://localhost:8000';
+        url = 'http://localhost:8000/index';
         userId = String(localStorage.getItem('userId'));
         userType = localStorage.getItem('userType');
 
@@ -435,7 +435,7 @@
         // 根据日期查询班次
         function querySchedules(date) {
             // 发送请求到后端
-            let json = JSON.stringify({'date': encodeURIComponent(date), 'userType': userType});
+            let json = JSON.stringify({'date': encodeURIComponent(date), 'usertype': userType});
             console.log(`用户${userId} 查询 ${date} 的班车`);
             fetch(`${url}/queryAll`, {
                 method: 'POST',
@@ -498,7 +498,7 @@
             busId = curBusId;
             busId = String(busId); // 确保为字符串类型
             // 点击预约按钮尝试预约，查看状态是否正常
-            let json = JSON.stringify({'userId': userId, 'busId': busId});
+            let json = JSON.stringify({'userid': userId, 'busid': busId});
             console.log(`用户${userId} 预约 班车${busId}`);
             fetch(`${url}/book`, {
                 method: 'POST',
@@ -544,7 +544,7 @@
 
         // 点击支付按钮模拟支付
         function payed() {
-            let json = JSON.stringify({'userId': userId, 'busId': busId});
+            let json = JSON.stringify({'userid': userId, 'busid': busId});
             console.log(`用户${userId} 成功预约 班车${busId}`);
             fetch(`${url}/payed`, {
                 method: 'POST',
@@ -583,7 +583,7 @@
         // 查询已预约班车
         function queryBooked() {
             // 发送请求到后端查询班次
-            let json = JSON.stringify({'userId': userId});
+            let json = JSON.stringify({'userid': userId});
             console.log(`用户${userId} 查询已预约班车`);
             fetch(`${url}/queryBooked`, {
                 method: 'POST',
@@ -639,7 +639,7 @@
         function unbook(busId) {
             // 逻辑代码
             busId = String(busId);
-            let json = JSON.stringify({'userId': userId, 'busId': busId});
+            let json = JSON.stringify({'userid': userId, 'busid': busId});
             console.log(`用户${userId} 取消预约 班车${busId}`);
             fetch(`${url}/unbook`, {
                 method: 'POST',
@@ -671,7 +671,7 @@
         // 查询历史订单
         function queryFinished() {
             // 发送请求到后端
-            let json = JSON.stringify({'userId': userId});
+            let json = JSON.stringify({'userid': userId});
             console.log(`用户${userId} 查询历史订单`);
             fetch(`${url}/queryFinished`, {
                 method: 'POST',
