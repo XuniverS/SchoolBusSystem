@@ -54,42 +54,33 @@ func queryUserWithUserID(db *gorm.DB, user *User) (*User, error) {
 func submitUserInfo(c *gin.Context) {
 	var user User
 
-	// 获取查询参数并赋值到结构体字段
-	user.userID = c.DefaultQuery("userid", "")     // 如果没有提供userId，默认空字符串
-	user.userName = c.DefaultQuery("username", "") // 如果没有提供username，默认空字符串
-	user.email = c.DefaultQuery("email", "")       // 如果没有提供email，默认空字符串
+	user.userID = c.DefaultQuery("userid", "")
+	user.userName = c.DefaultQuery("username", "")
+	user.email = c.DefaultQuery("email", "")
 
-	// 检查是否有必要的字段
 	if user.userID == "" || user.userName == "" || user.email == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Missing required fields"})
 		return
 	}
 
-	// 查询数据库中是否存在该用户
 	existingUser, err := queryUserWithUserID(db, &user)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			// 如果找不到用户，返回404
 			c.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": "User not found"})
 		} else {
-			// 其他数据库错误
 			c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": err.Error()})
 		}
 		return
 	}
 
-	// 更新用户信息
 	existingUser.userName = user.userName
 	existingUser.email = user.email
 
-	// 保存更新的用户信息到数据库
 	if err := db.Save(&existingUser).Error; err != nil {
-		// 如果保存失败，返回修改失败
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "Failed to update user"})
 		return
 	}
 
-	// 如果更新成功，返回成功状态
 	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "User information updated"})
 }
 
