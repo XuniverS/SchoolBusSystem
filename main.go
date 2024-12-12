@@ -3,5 +3,8 @@ package main
 import "awesomeProject/back"
 
 func main() {
-	back.InitAdmin()
+
+	router := back.SetupRoutes()
+	router.Run(":8000")
+
 }
