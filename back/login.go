@@ -12,13 +12,13 @@ import (
 )
 
 type User struct {
-	userID         string    `json:"userId"`
-	userType       string    `json:"userType"`
-	userName       string    `json:"userName"`
+	userID         string    `json:"userid"`
+	userType       string    `json:"usertype"`
+	userName       string    `json:"username"`
 	email          string    `json:"email"`
 	password       string    `json:"password"`
-	if_first_login bool      `json:"If_First_Login"`
-	createdTime    time.Time `json:"createdTime"`
+	if_first_login bool      `json:"if_first_login"`
+	createdTime    time.Time `json:"createdtime"`
 }
 
 func RegisterUserModule(router *gin.Engine) {
@@ -26,7 +26,7 @@ func RegisterUserModule(router *gin.Engine) {
 	userRouters := router.Group("/user")
 	{
 		userRouters.POST("/login", userLogin)
-		userRouters.GET("signin", userSignIn)
+		userRouters.GET("/signin", userSignIn)
 	}
 
 }
@@ -70,14 +70,19 @@ func queryUser(db *gorm.DB, user User) (*User, error) {
 }
 
 func userSignIn(c *gin.Context) {
+	var user User
+	user.userType = c.Query("usertype")
+	user.userName = c.Query("username")
+	user.password = c.Query("password")
+	user.email 	  = c.Query("email")
 
-	username := c.Query("username")
-	password := c.Query("password")
-
-	if username == "" || password == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "用户名或密码不能为空"})
+	if user.userName == "" || user.password == "" || user.email == ""{
+		c.JSON(http.StatusBadRequest, gin.H{"message": "用户名、密码、邮箱都不能为空"})
 		return
 	}
 
+
 	c.JSON(http.StatusOK, gin.H{"message": "登录成功"})
 }
+
+func changePasswd
