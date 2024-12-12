@@ -46,7 +46,15 @@ func addBus(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "添加成功"})
 }
 
+func removeBus(c *gin.Context) {
+
+}
+
 func insertBus(bus *Bus) error {
 	result := db.Create(bus)
 	return result.Error
+}
+
+func deleteBus(bus *Bus) error {
+	return nil
 }

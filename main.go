@@ -10,13 +10,14 @@ func main() {
 
 	router := gin.Default()
 	router.Use(cors.Default())
-	router.Static("", "./front")
 
 	back.InitDatabase()
 
 	back.RegisterUserModule(router)
 	back.RegisterSetupRoutes(router)
 	back.RegisterProfileModule(router)
+
+	router.Static("/htmls", "./front/htmls")
 
 	router.Run(":8000")
 
