@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -22,19 +21,17 @@ type User struct {
 	createdTime    time.Time `json:"createdTime"`
 }
 
-func LoginModule() *gin.Engine {
-	router := gin.Default()
-
-	router.Use(cors.Default())
-
+func RegisterUserModule(router *gin.Engine) {
 	router.Static("", "./front")
+	userRouters := router.Group("/user")
+	{
+		userRouters.POST("/login", userLogin)
+		userRouters.GET("signin", userSignIn)
+	}
 
-	router.POST("/login", login)
-
-	return router
 }
 
-func login(c *gin.Context) {
+func userLogin(c *gin.Context) {
 	var user User
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": err.Error()})
@@ -72,6 +69,15 @@ func queryUser(db *gorm.DB, user User) (*User, error) {
 	return &queriedUser, nil
 }
 
-func SignInModule(c gin.Context) {
+func userSignIn(c *gin.Context) {
 
+	username := c.Query("username")
+	password := c.Query("password")
+
+	if username == "" || password == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "用户名或密码不能为空"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "登录成功"})
 }
