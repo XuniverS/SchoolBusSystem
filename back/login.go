@@ -6,9 +6,6 @@ import (
 	"net/http"
 	"time"
 
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -34,36 +31,26 @@ func RegisterUserModule(router *gin.Engine) {
 
 func userLogin(c *gin.Context) {
 	var user User
-	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": err.Error()})
-		return
-	}
+	user.userName = c.Query("username")
+	user.password = c.Query("password")
 
-	db, err := gorm.Open(mysql.New(mysql.Config{
-		DSN:                       "root:C0137yx.@tcp(127.0.0.1:3306)/BusBookingSystem",
-		SkipInitializeWithVersion: true,
-	}), &gorm.Config{})
+	queriedUser, err := queryUser(user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "数据库链接失败"})
-		return
-	}
-	queriedUser, err := queryUser(db, user)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "查询错误"})
+		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail"})
 		return
 	}
 	hashBytes := sha256.Sum256([]byte(user.password))
 	hashString := hex.EncodeToString(hashBytes[:])
 	if hashString != queriedUser.password {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "密码错误"})
+		c.JSON(http.StatusBadRequest, gin.H{"status": "fail"})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"status": "success", "userType": "学生", "init": "1"})
 }
 
-func queryUser(db *gorm.DB, user User) (*User, error) {
+func queryUser(user User) (*User, error) {
 	var queriedUser User
-	result := db.Where("user_id =?", user.userName).First(&queriedUser)
+	result := db.Where("username = ?", user.userName).First(&queriedUser)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -81,22 +68,15 @@ func userSignIn(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "用户名、密码、邮箱都不能为空"})
 		return
 	}
-	db, err := gorm.Open(mysql.New(mysql.Config{
-		DSN:                       "root:C0137yx.@tcp(127.0.0.1:3306)/BusBookingSystem",
-		SkipInitializeWithVersion: true,
-	}), &gorm.Config{})
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "数据库链接失败"})
-		return
-	}
-	if insertUser(db, &user) == nil {
+
+	if insertUser(&user) != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "插入用户失败"})
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "用户注册成功"})
 }
 
-func insertUser(db *gorm.DB, user *User) error {
+func insertUser(user *User) error {
 	result := db.Create(user)
 	return result.Error
 }

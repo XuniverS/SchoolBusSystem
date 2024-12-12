@@ -1,8 +1,6 @@
 package back
 
 import (
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
 	"net/http"
 	"time"
 
@@ -41,21 +39,14 @@ func addBus(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "错误的时间！"})
 		return
 	}
-	db, err := gorm.Open(mysql.New(mysql.Config{
-		DSN:                       "root:C0137yx.@tcp(127.0.0.1:3306)/BusBookingSystem",
-		SkipInitializeWithVersion: true,
-	}), &gorm.Config{})
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "数据库链接失败"})
-		return
-	}
-	if err = insertBus(db, &bus); err != nil {
+
+	if err := insertBus(&bus); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "数据库写入失败"})
 	}
 	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "添加成功"})
 }
 
-func insertBus(db *gorm.DB, bus *Bus) error {
+func insertBus(bus *Bus) error {
 	result := db.Create(bus)
 	return result.Error
 }
