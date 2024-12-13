@@ -55,14 +55,14 @@ func book(c *gin.Context) {
 	}
 
 	var existingBooking Booking
-	result := db.Where("userId =? AND busId =?", reqData.UserId, reqData.BusId).First(&existingBooking)
+	result := db.Where("userId =? AND busId =?", reqData.UserId, reqData.BusId).Take(&existingBooking)
 	if result.Error == nil {
 		c.JSON(http.StatusOK, gin.H{"status": "booked"})
 		return
 	}
 
 	var bus Bus
-	result = db.Where("busId =?", reqData.BusId).First(&bus)
+	result = db.Where("busId =?", reqData.BusId).Take(&bus)
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "查询班车信息失败"})
 		return
@@ -103,7 +103,7 @@ func payed(c *gin.Context) {
 	}
 
 	var booking Booking
-	result := db.Where("userId =? AND busId =?", reqData.UserId, reqData.BusId).First(&booking)
+	result := db.Where("userId =? AND busId =?", reqData.UserId, reqData.BusId).Take(&booking)
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "查询预约记录失败"})
 		return
@@ -134,7 +134,7 @@ func unbook(c *gin.Context) {
 	}
 
 	var booking Booking
-	result := db.Where("userId =? AND busId =?", reqData.UserId, reqData.BusId).First(&booking)
+	result := db.Where("userId =? AND busId =?", reqData.UserId, reqData.BusId).Take(&booking)
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "查询预约记录失败"})
 		return
@@ -153,7 +153,7 @@ func unbook(c *gin.Context) {
 	}
 
 	var bus Bus
-	result = db.Where("busId =?", reqData.BusId).First(&bus)
+	result = db.Where("busId =?", reqData.BusId).Take(&bus)
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "查询班车信息失败"})
 		return
@@ -186,7 +186,7 @@ func queryBooked(c *gin.Context) {
 	var bookedBuses []Bus
 	for _, booking := range bookings {
 		var bus Bus
-		result = db.Where("busId =?", booking.BusId).First(&bus)
+		result = db.Where("busId =?", booking.BusId).Take(&bus)
 		if result.Error == nil {
 			bookedBuses = append(bookedBuses, bus)
 		}
@@ -223,7 +223,7 @@ func queryFinished(c *gin.Context) {
 	}
 	for _, booking := range bookings {
 		var bus Bus
-		result = db.Where("busId =?", booking.BusId).First(&bus)
+		result = db.Where("busId =?", booking.BusId).Take(&bus)
 		if result.Error == nil {
 			var item struct {
 				Status      string    `json:"status"`
