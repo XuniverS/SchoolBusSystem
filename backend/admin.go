@@ -4,7 +4,6 @@ import (
 	"errors"
 	"gorm.io/gorm"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -51,13 +50,12 @@ func addBus(c *gin.Context) {
 }
 
 func removeBus(c *gin.Context) {
-	busId := c.Query("busId")
-	id, err := strconv.Atoi(busId)
-	if err != nil {
+	var bus Bus
+	if err := c.ShouldBindJSON(&bus); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "fail"})
 		return
 	}
-	result := deleteBus(id)
+	result := deleteBus(bus.BusId)
 	c.JSON(http.StatusOK, result)
 }
 
