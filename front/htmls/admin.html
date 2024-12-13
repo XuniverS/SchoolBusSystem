@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>个人中心</title>
-    <link rel="icon" href="tubiao.png" type="image/png">
+    <link rel="icon" href="../img/tubiao.png" type="image/png">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -327,7 +327,7 @@
 
     <!--登录控制-->
     <script>
-        url = 'http://localhost:8000';
+        url = '/bus';
         userId = localStorage.getItem('userId');
 
         if (userId == -1) {
@@ -407,7 +407,7 @@
             let json = JSON.stringify({
                 "origin": origin,
                 'destination': destination,
-                'busType': busType,
+                'bustype': busType,
                 'date': date,
                 'time': time,
                 'plate': plate,
@@ -415,7 +415,7 @@
             });
             console.log(json);
             // 发送请求
-            fetch(`${url}/bus/addBus`, {
+            fetch(`${url}/addBus`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -449,7 +449,7 @@
                 timeId = -1;
             }
             // 发送请求到后端
-            let json = JSON.stringify({'date': 'any', 'userType': 'admin'});
+            let json = JSON.stringify({'date': 'any', 'usertype': 'admin'});
             console.log(`用户${userId} 查询班车`);
             fetch(`${url}/queryAll`, {
                 method: 'POST',
@@ -506,7 +506,7 @@
         function deleteBus(busId) {
             // 删除班车
             busId = String(busId);
-            let json = JSON.stringify({'busId': busId});
+            let json = JSON.stringify({'busid': busId});
             console.log(`用户${userId} 查询班车`);
             fetch(`${url}/deleteBus`, {
                 method: 'POST',
@@ -539,7 +539,7 @@
         function queryUser() {
             const curUserId = document.getElementById('userId').value;
 
-            let json = JSON.stringify({"userId": curUserId});
+            let json = JSON.stringify({"userid": curUserId});
             // 发送请求查询用户信息
             fetch(`${url}/queryUser`, {
                 method: 'POST',
@@ -580,8 +580,8 @@
             }
 
             let json = JSON.stringify({
-                "userId": userId,
-                "userType": userType,
+                "userid": userId,
+                "usertype": userType,
                 "username": username,
                 "email": email
             });
@@ -637,7 +637,7 @@
         function confirm() {
             const curUserId = document.getElementById('userId').value;
 
-            let json = JSON.stringify({"userId": curUserId});
+            let json = JSON.stringify({"userid": curUserId});
             // 发送请求查询用户信息
             fetch(`${url}/initPassword`, {
                 method: 'POST',

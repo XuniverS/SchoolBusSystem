@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>个人中心</title>
-    <link rel="icon" href="tubiao.png" type="image/png">
+    <link rel="icon" href="../img/tubiao.png" type="image/png">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -195,7 +195,7 @@
 
     <!--登录控制-->
     <script>
-        url = 'http://localhost:8000';
+        url = '/profile';
         userId = localStorage.getItem('userId');
 
         if (userId == -1) {
@@ -272,7 +272,7 @@
         queryProfile(userId);
 
         function queryProfile(userId) {
-            let json = JSON.stringify({"userId": userId});
+            let json = JSON.stringify({"userid": userId});
             // 发送请求
             fetch(`${url}/queryUser`, {
                 method: 'POST',
@@ -313,8 +313,8 @@
             const email = document.getElementById('email').value;
 
             let json = JSON.stringify({
-                "userId": userId,
-                "userType": userType,
+                "userid": userId,
+                "usertype": userType,
                 "username": username,
                 "email": email
             });
@@ -362,7 +362,7 @@
                 return;
             }
 
-            let json = JSON.stringify({"originPassword": originPassword, "newPassword": newPassword});
+            let json = JSON.stringify({"userid": userId,"originpassword": originPassword, "newpassword": newPassword});
             // 发送请求修改密码
             fetch(`${url}/changePassword`, {
                 method: 'POST',

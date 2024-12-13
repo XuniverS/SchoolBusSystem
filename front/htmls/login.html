@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <title>欢迎使用班车预约系统</title>
-        <link rel="icon" href="tubiao.png" type="image/png">
+        <link rel="icon" href="../img/tubiao.png" type="image/png">
         <style>
             body {
                 font-family: Arial, sans-serif;
@@ -82,7 +82,7 @@
     <body>
         <div class="login-container"> 
             <h2>登录</h2>
-            <form id="myForm" action="http://localhost:8000/html/login.html" method="post">
+            <form id="myForm">
                 <div class="input-icon">
                     <img src="../img/username-icon.png" alt="User Icon">
                     <input type="text" id="username" name="username" placeholder="请输入学号/工号" required>
@@ -98,7 +98,7 @@
             </form>
         </div>
         <script>
-            url = 'http://localhost:8000';
+            url = '/user';
             function forgetPassword() {
                 alert("请联系管理员 admin@uestc.com");
             }
@@ -112,8 +112,8 @@
                 
                 var form = document.getElementById("myForm"); // 获取表单数据
                 json = JSON.stringify({
-                    username: form.username.value,
-                    password: form.password.value
+                    'username': form.username.value,
+                    'password': form.password.value
                 })
 
                 // 使用fetch发送数据到服务器
