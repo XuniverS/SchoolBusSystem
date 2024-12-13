@@ -26,19 +26,17 @@ type User struct {
 }
 
 type Bus struct {
-	BusId          int       `gorm:"column:busId;primaryKey" json:"busId"`
+	BusId          int       `gorm:"column:busId;primaryKey" json:"busid"`
 	Origin         string    `gorm:"column:origin" json:"origin"`
 	Destination    string    `gorm:"column:destination" json:"destination"`
-	BusType        string    `gorm:"column:busType" json:"busType"`
+	BusType        string    `gorm:"column:busType" json:"bustype"`
 	Date           time.Time `gorm:"column:date" json:"date"`
-	Time           time.Time `gorm:"column:time" json:"time"`
+	Time           string    `gorm:"column:time" json:"time"`
 	Plate          string    `gorm:"column:plate" json:"plate"`
 	TotalSeats     int       `gorm:"column:total_seats" json:"totalseats"`
 	AvailableSeats int       `gorm:"column:available_seats" json:"availableseats"`
 	CreatedAt      time.Time `gorm:"column:created_at" json:"createdtime"`
 }
-
-// Bo
 
 var db *gorm.DB
 

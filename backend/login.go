@@ -36,7 +36,7 @@ func userLogin(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"status": "success", "usertype": user.UserType, "init": updateUserIsFirstLogin(queriedUser)})
+	c.JSON(http.StatusOK, gin.H{"status": "success", "userid": queriedUser.UserID, "usertype": queriedUser.UserType, "init": updateUserIsFirstLogin(queriedUser)})
 }
 
 func updateUserIsFirstLogin(user *User) int {
@@ -63,7 +63,7 @@ func userSignIn(c *gin.Context) {
 		return
 	}
 
-	if user.UserName == "" || user.Password == "" || user.Email == "" {
+	if len(user.UserName) == 0 || len(user.Password) == 0 || len(user.Email) == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "用户名、密码、邮箱都不能为空"})
 		return
 	}

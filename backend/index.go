@@ -29,6 +29,15 @@ func queryAll(c *gin.Context) {
 	}
 
 	var buses []Bus
+	if reqData.Date == "any" {
+		result := db.Find(&buses)
+		if result.Error != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "any日期格式错误"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"status": "success", "message": buses})
+		return
+	}
 	queryDate, err := time.Parse("2006-01-02", reqData.Date)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "日期格式错误"})
@@ -169,7 +178,7 @@ func unbook(c *gin.Context) {
 
 func queryBooked(c *gin.Context) {
 	var reqData struct {
-		UserId string `json:"userId"`
+		UserID string `json:"userid"`
 	}
 	if err := c.ShouldBindJSON(&reqData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "参数解析错误"})
@@ -177,7 +186,7 @@ func queryBooked(c *gin.Context) {
 	}
 
 	var bookings []Booking
-	result := db.Where("userId =? AND (status = '已预约' OR status = '已支付')", reqData.UserId).Find(&bookings)
+	result := db.Where("username =? AND (status = '已预约' OR status = '已支付')", reqData.UserID).Find(&bookings)
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "查询预约记录失败"})
 		return
@@ -213,11 +222,11 @@ func queryFinished(c *gin.Context) {
 
 	var finishedBuses []struct {
 		Status      string    `json:"status"`
-		BusId       int       `json:"busId"`
+		BusId       int       `json:"busid"`
 		Origin      string    `json:"origin"`
 		Destination string    `json:"destination"`
-		Time        time.Time `json:"time"`
-		BusType     string    `json:"busType"`
+		Time        string    `json:"time"`
+		BusType     string    `json:"bustype"`
 		Plate       string    `json:"plate"`
 		Date        time.Time `json:"date"`
 	}
@@ -227,11 +236,11 @@ func queryFinished(c *gin.Context) {
 		if result.Error == nil {
 			var item struct {
 				Status      string    `json:"status"`
-				BusId       int       `json:"busId"`
+				BusId       int       `json:"busid"`
 				Origin      string    `json:"origin"`
 				Destination string    `json:"destination"`
-				Time        time.Time `json:"time"`
-				BusType     string    `json:"busType"`
+				Time        string    `json:"time"`
+				BusType     string    `json:"bustype"`
 				Plate       string    `json:"plate"`
 				Date        time.Time `json:"date"`
 			}

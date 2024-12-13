@@ -14,6 +14,8 @@ func RegisterSetupRoutes(router *gin.Engine) {
 	{
 		busRoutes.POST("/addBus", addBus)
 		busRoutes.POST("/deleteBus", removeBus)
+		busRoutes.POST("/queryAll", queryAll)
+		busRoutes.POST("/queryUser", queryUsersWithUserID)
 	}
 }
 
