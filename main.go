@@ -1,7 +1,7 @@
 package main
 
 import (
-	"awesomeProject/back"
+	"awesomeProject/backend"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
@@ -11,11 +11,11 @@ func main() {
 	router := gin.Default()
 	router.Use(cors.Default())
 
-	back.InitDatabase()
+	backend.InitDatabase()
 
-	back.RegisterUserModule(router)
-	back.RegisterSetupRoutes(router)
-	back.RegisterProfileModule(router)
+	backend.RegisterUserModule(router)
+	backend.RegisterSetupRoutes(router)
+	backend.RegisterProfileModule(router)
 
 	router.Static("/htmls", "./front/htmls")
 
