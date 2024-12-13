@@ -14,6 +14,8 @@ func RegisterSetupRoutes(router *gin.Engine) {
 	{
 		busRoutes.POST("/addBus", addBus)
 		busRoutes.POST("/deleteBus", removeBus)
+		busRoutes.POST("/queryAll", queryAll)
+		busRoutes.POST("/queryUser", queryUsersWithUserID)
 	}
 }
 
@@ -55,7 +57,7 @@ func insertBus(bus *Bus) error {
 
 func deleteBus(busId int) map[string]interface{} {
 	var bus Bus
-	result := db.Where("bus_id =?", busId).First(&bus)
+	result := db.Where("busId =?", busId).Take(&bus)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return map[string]interface{}{"status": "fail", "message": "要删除的记录不存在"}
@@ -63,7 +65,7 @@ func deleteBus(busId int) map[string]interface{} {
 		return map[string]interface{}{"status": "fail", "message": "查询记录时出错，无法执行删除操作"}
 	}
 
-	bookingCount := db.Model(&Bus{}).Where("bus_id =?", busId).Association("Bookings").Count()
+	bookingCount := db.Model(&Bus{}).Where("busId =?", busId).Association("Bookings").Count()
 	if bookingCount > 0 {
 		return map[string]interface{}{"status": "booked", "message": "有用户预约了该班车，删除失败"}
 	}

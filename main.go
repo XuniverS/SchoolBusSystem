@@ -6,12 +6,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func init() {
+	backend.InitDatabase()
+}
+
 func main() {
 
 	router := gin.Default()
 	router.Use(cors.Default())
-
-	backend.InitDatabase()
 
 	backend.RegisterUserModule(router)
 	backend.RegisterSetupRoutes(router)

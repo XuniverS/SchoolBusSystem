@@ -50,7 +50,7 @@ func queryUsersWithUserID(c *gin.Context) {
 
 func queryUserWithUserID(userId string) (*User, error) {
 	var queriedUser User
-	result := db.Where("userId = ?", userId).First(&queriedUser)
+	result := db.Where("userId = ?", userId).Take(&queriedUser)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil, gorm.ErrRecordNotFound
