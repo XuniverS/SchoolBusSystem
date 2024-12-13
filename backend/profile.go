@@ -1,4 +1,4 @@
-package back
+package backend
 
 import (
 	"errors"
@@ -18,7 +18,7 @@ func RegisterProfileModule(router *gin.Engine) {
 
 func queryUsersWithUserID(c *gin.Context) {
 	var user User
-	user.userID = c.Query("userid")
+	user.UserID = c.Query("userid")
 
 	queriedUser, err := queryUserWithUserID(db, &user)
 	if err != nil {
@@ -33,15 +33,15 @@ func queryUsersWithUserID(c *gin.Context) {
 	// 成功返回用户信息
 	c.JSON(http.StatusOK, gin.H{
 		"status":   "success",
-		"userType": queriedUser.userType,
-		"username": queriedUser.userName,
-		"email":    queriedUser.email,
+		"userType": queriedUser.UserType,
+		"username": queriedUser.UserName,
+		"email":    queriedUser.Email,
 	})
 }
 
 func queryUserWithUserID(db *gorm.DB, user *User) (*User, error) {
 	var queriedUser User
-	result := db.Where("userId = ?", user.userID).First(&queriedUser)
+	result := db.Where("userId = ?", user.UserID).First(&queriedUser)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil, gorm.ErrRecordNotFound
@@ -54,11 +54,11 @@ func queryUserWithUserID(db *gorm.DB, user *User) (*User, error) {
 func submitUserInfo(c *gin.Context) {
 	var user User
 
-	user.userID = c.DefaultQuery("userid", "")
-	user.userName = c.DefaultQuery("username", "")
-	user.email = c.DefaultQuery("email", "")
+	user.UserID = c.DefaultQuery("userid", "")
+	user.UserName = c.DefaultQuery("username", "")
+	user.Email = c.DefaultQuery("email", "")
 
-	if user.userID == "" || user.userName == "" || user.email == "" {
+	if user.UserID == "" || user.UserName == "" || user.Email == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Missing required fields"})
 		return
 	}
@@ -73,8 +73,8 @@ func submitUserInfo(c *gin.Context) {
 		return
 	}
 
-	existingUser.userName = user.userName
-	existingUser.email = user.email
+	existingUser.UserName = user.UserName
+	existingUser.Email = user.Email
 
 	if err := db.Save(&existingUser).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "Failed to update user"})

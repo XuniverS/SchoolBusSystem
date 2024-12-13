@@ -1,4 +1,4 @@
-package back
+package backend
 
 import "github.com/gin-gonic/gin"
 
@@ -15,5 +15,5 @@ func RegisterIndexModule(router *gin.Engine) {
 }
 
 func queryAll() {
-	
+
 }
