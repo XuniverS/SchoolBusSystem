@@ -144,7 +144,7 @@
                         // 用户登录
                         else {
                             // 初次登录提醒修改密码
-                            if (data.init == "1") {
+                            if (data.isfirstlogin == "1") {
                                 alert("当前为初次登录，请尽快修改密码");
                             }
 
@@ -152,7 +152,7 @@
                             let time = new Date().getTime();
                             localStorage.setItem("loginTime", time); // 记录登录时间，用于计算登录时长
 
-                            localStorage.setItem("userType", data.userType);
+                            localStorage.setItem("userType", data.usertype);
 
                             console.log(`用户${userId}登录，登录时间：${time}`);
                             window.location.href = 'index.html';
