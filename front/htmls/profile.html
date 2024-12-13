@@ -294,7 +294,7 @@
 
         function displayProfile(data) {
             // userId userType username email
-            var userType = data.userType;
+            var userType = data.usertype;
             var username = data.username;
             var email = data.email;
 
@@ -377,7 +377,7 @@
                 var status = data.status;
                 if (status == "success") {
                     changeSuccess();
-                } else if (status == "passwordWrong") alert("原密码错误");
+                } else if (status == "passwordwrong") alert("原密码错误");
                 else alert('更改失败');
             })
             .catch(error => {

@@ -553,7 +553,7 @@
                 // 处理后端返回的数据
                 var status = data.status;
                 if (status == "success") {
-                    document.getElementById('userType').value = data.userType;
+                    document.getElementById('userType').value = data.usertype;
                     document.getElementById('username').value = data.username;
                     document.getElementById('email').value = data.email;
                 } else if (status == 'inexist') alert("没有查询到该用户");

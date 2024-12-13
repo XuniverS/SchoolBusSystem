@@ -457,13 +457,13 @@
         }
     
         // 展示班次信息
-        function displaySchedules(busSchedules, date) {
+        function displaySchedules(data, date) {
             const busSchedulesContainer = document.querySelector('.bus-schedule-cards');
             busSchedulesContainer.innerHTML = ''; // 清空现有班次信息
     
             var cnt = 0;
 
-            busSchedules.forEach(schedule => {
+            data.forEach(schedule => {
                 
                 let busTime = new Date(date + " " + schedule.time);
                 let now = new Date();
@@ -473,7 +473,7 @@
                     const scheduleCard = document.createElement('div');
                     scheduleCard.className = 'bus-schedule-card';
                     scheduleCard.innerHTML = `
-                        <h3>${schedule.busType}</h3>
+                        <h3>${schedule.bustype}</h3>
                         <p>出发地：${schedule.origin}</p>
                         <p>目的地：${schedule.destination}</p>
                         <p>出发时间：${schedule.time}</p>
@@ -604,18 +604,18 @@
         }
     
         // 展示已预约班次信息
-        function displayBooked(busSchedules) {
+        function displayBooked(data) {
             const busSchedulesContainer = document.querySelector('.bus-booked-cards');
             busSchedulesContainer.innerHTML = ''; // 清空现有班次信息
             
             var cnt = 0;
 
-            busSchedules.forEach(schedule => {
+            data.forEach(schedule => {
                 cnt++;
                 const scheduleCard = document.createElement('div');
                 scheduleCard.className = 'bus-schedule-card';
                 scheduleCard.innerHTML = `
-                    <h3>${schedule.busType}</h3>
+                    <h3>${schedule.bustype}</h3>
                     <p>出发地：${schedule.origin}</p>
                     <p>目的地：${schedule.destination}</p>
                     <p>出发时间：${schedule.time}</p>
@@ -692,18 +692,18 @@
         }
 
         // 展示历史订单
-        function displayFinished(orders) {
+        function displayFinished(data) {
             const busSchedulesContainer = document.querySelector('.order-cards');
             busSchedulesContainer.innerHTML = ''; // 清空现有班次信息
             
             var cnt = 0;
 
-            orders.forEach(order => {
+            data.forEach(order => {
                 cnt++;
                 const orderCard = document.createElement('div');
                 orderCard.className = 'bus-schedule-card';
                 orderCard.innerHTML = `
-                    <h3>${order.busType}</h3>
+                    <h3>${order.bustype}</h3>
                     <h4>${order.status == 'finished' ? "已完成" : "已取消"}</h4>
                     <br>
                     <p>出发地：${order.origin}</p>
