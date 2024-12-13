@@ -18,7 +18,10 @@ func RegisterProfileModule(router *gin.Engine) {
 
 func queryUsersWithUserID(c *gin.Context) {
 	var user User
-	user.UserID = c.Query("userid")
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"status": "fail"})
+		return
+	}
 
 	queriedUser, err := queryUserWithUserID(db, &user)
 	if err != nil {
@@ -53,10 +56,10 @@ func queryUserWithUserID(db *gorm.DB, user *User) (*User, error) {
 
 func submitUserInfo(c *gin.Context) {
 	var user User
-
-	user.UserID = c.DefaultQuery("userid", "")
-	user.UserName = c.DefaultQuery("username", "")
-	user.Email = c.DefaultQuery("email", "")
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"status": "fail"})
+		return
+	}
 
 	if user.UserID == "" || user.UserName == "" || user.Email == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Missing required fields"})

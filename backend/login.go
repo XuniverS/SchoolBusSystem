@@ -63,10 +63,10 @@ func queryUser(user User) (*User, error) {
 
 func userSignIn(c *gin.Context) {
 	var user User
-	user.UserType = c.Query("usertype")
-	user.UserName = c.Query("username")
-	user.Password = c.Query("password")
-	user.Email = c.Query("email")
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"status": "fail"})
+		return
+	}
 
 	if user.UserName == "" || user.Password == "" || user.Email == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "用户名、密码、邮箱都不能为空"})
