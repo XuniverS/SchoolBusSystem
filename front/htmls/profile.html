@@ -362,7 +362,7 @@
                 return;
             }
 
-            let json = JSON.stringify({"userid": userId,"originpassword": originPassword, "newpassword": newPassword});
+            let json = JSON.stringify({"userid": userId, "originpassword": originPassword, "newpassword": newPassword});
             // 发送请求修改密码
             fetch(`${url}/changePassword`, {
                 method: 'POST',
