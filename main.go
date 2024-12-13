@@ -16,6 +16,7 @@ func main() {
 	backend.RegisterUserModule(router)
 	backend.RegisterSetupRoutes(router)
 	backend.RegisterProfileModule(router)
+	backend.RegisterIndexModule(router)
 
 	router.Static("/htmls", "./front/htmls")
 

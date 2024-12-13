@@ -9,22 +9,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Bus struct {
-	BusId          int       `json:"busId"`
-	Origin         string    `json:"origin"`
-	Destination    string    `json:"destination"`
-	BusType        string    `json:"busType"`
-	Date           time.Time `json:"date"`
-	Time           time.Time `json:"time"`
-	Plate          string    `json:"plate"`
-	Seats          int       `json:"seats"`
-	avaliableSeats int
-}
-
 func RegisterSetupRoutes(router *gin.Engine) {
 	busRoutes := router.Group("/bus")
 	{
 		busRoutes.POST("/addBus", addBus)
+		busRoutes.POST("/deleteBus", removeBus)
 	}
 }
 
@@ -52,7 +41,7 @@ func addBus(c *gin.Context) {
 func removeBus(c *gin.Context) {
 	var bus Bus
 	if err := c.ShouldBindJSON(&bus); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "fail"})
+		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail"})
 		return
 	}
 	result := deleteBus(bus.BusId)

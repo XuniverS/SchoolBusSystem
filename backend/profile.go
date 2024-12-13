@@ -7,6 +7,12 @@ import (
 	"net/http"
 )
 
+type UpdatePasswordRequest struct {
+	UserID         string `json:"userid"`
+	NewPassword    string `json:"newpassword"`
+	OriginPassword string `json:"originpassword"`
+}
+
 func RegisterProfileModule(router *gin.Engine) {
 	profilerouter := router.Group("/profile")
 	{
@@ -23,7 +29,7 @@ func queryUsersWithUserID(c *gin.Context) {
 		return
 	}
 
-	queriedUser, err := queryUserWithUserID(db, &user)
+	queriedUser, err := queryUserWithUserID(&user)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"status": "not_found", "message": "User not found"})
@@ -42,7 +48,7 @@ func queryUsersWithUserID(c *gin.Context) {
 	})
 }
 
-func queryUserWithUserID(db *gorm.DB, user *User) (*User, error) {
+func queryUserWithUserID(user *User) (*User, error) {
 	var queriedUser User
 	result := db.Where("userId = ?", user.UserID).First(&queriedUser)
 	if result.Error != nil {
@@ -66,7 +72,7 @@ func submitUserInfo(c *gin.Context) {
 		return
 	}
 
-	existingUser, err := queryUserWithUserID(db, &user)
+	existingUser, err := queryUserWithUserID(&user)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": "User not found"})
@@ -79,7 +85,7 @@ func submitUserInfo(c *gin.Context) {
 	existingUser.UserName = user.UserName
 	existingUser.Email = user.Email
 
-	if err := db.Save(&existingUser).Error; err != nil {
+	if err = db.Save(&existingUser).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "Failed to update user"})
 		return
 	}
@@ -88,5 +94,22 @@ func submitUserInfo(c *gin.Context) {
 }
 
 func changePassword(c *gin.Context) {
+	var user User
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail"})
+		return
+	}
+	queriedUser, err := queryUserWithUserID(&user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail"})
+		return
+	}
+	if shaEncode(user.Password) != queriedUser.Password {
+		c.JSON(http.StatusBadRequest, gin.H{"status": "passwordWrong"})
+	}
 
+}
+
+func updateUserPassword(user User, newPassword string) error {
+	return nil
 }
