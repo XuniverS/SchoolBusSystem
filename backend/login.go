@@ -3,22 +3,10 @@ package backend
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
-
-type User struct {
-	UserID         string    `gorm:"column:userId;primaryKey" json:"userid"`
-	UserType       string    `gorm:"column:userType" json:"usertype"`
-	UserName       string    `gorm:"column:username" json:"username"`
-	Email          string    `gorm:"column:email" json:"email"`
-	Password       string    `gorm:"column:password" json:"password"`
-	Is_first_login bool      `gorm:"column:is_first_login" json:"isfirstlogin"`
-	CreatedTime    time.Time `gorm:"column:created_at" json:"createdtime"`
-}
 
 func RegisterUserModule(router *gin.Engine) {
 
@@ -33,30 +21,37 @@ func RegisterUserModule(router *gin.Engine) {
 func userLogin(c *gin.Context) {
 	var user User
 	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "fail"})
+		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail"})
 		return
 	}
 
-	queriedUser, err := queryUser(user)
-	fmt.Println(err)
+	queriedUser, err := queryUser(&user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail"})
 		return
 	}
-	hashBytes := sha256.Sum256([]byte(user.Password))
-	hashString := hex.EncodeToString(hashBytes[:])
+	hashString := shaEncode(user.Password)
 	if hashString != queriedUser.Password {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "fail"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"status": "success", "userType": "学生", "init": "1"})
+
+	c.JSON(http.StatusOK, gin.H{"status": "success", "usertype": user.UserType, "init": updateUserIsFirstLogin(queriedUser)})
 }
 
-func queryUser(user User) (*User, error) {
+func updateUserIsFirstLogin(user *User) int {
+	if user.Is_first_login {
+		db.Model(&User{}).Where("userId =?", user.UserID).Update("is_first_login", 0)
+		return 1
+	}
+	return 0
+}
+
+func queryUser(user *User) (*User, error) {
 	var queriedUser User
 	result := db.Where("username = ?", user.UserName).Take(&queriedUser)
 	if result.Error != nil {
-		return nil, result.Error
+		return &User{}, result.Error
 	}
 	return &queriedUser, nil
 }
@@ -83,4 +78,9 @@ func userSignIn(c *gin.Context) {
 func insertUser(user *User) error {
 	result := db.Create(user)
 	return result.Error
+}
+
+func shaEncode(p string) string {
+	hashBytes := sha256.Sum256([]byte(p))
+	return hex.EncodeToString(hashBytes[:])
 }
