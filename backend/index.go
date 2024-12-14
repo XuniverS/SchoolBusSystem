@@ -61,8 +61,8 @@ func queryAll(c *gin.Context) {
 
 func book(c *gin.Context) {
 	var reqData struct {
-		UserId string `json:"userId"`
-		BusId  int    `json:"busId"`
+		UserId string `json:"userid"`
+		BusId  int    `json:"busid"`
 	}
 	if err := c.ShouldBindJSON(&reqData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "参数解析错误"})
@@ -109,7 +109,7 @@ func book(c *gin.Context) {
 
 func payed(c *gin.Context) {
 	var reqData struct {
-		UserId string `json:"userId"`
+		UserId string `json:"userid"`
 		BusId  int    `gorm:"column:busId" json:"busid"`
 	}
 	if err := c.ShouldBindJSON(&reqData); err != nil {

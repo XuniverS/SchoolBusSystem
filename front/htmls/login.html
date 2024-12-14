@@ -97,6 +97,18 @@
                 <button type="submit">登录</button>
             </form>
         </div>
+
+        <!--异常处理-->
+        <script>
+            function showError(error) {
+                console.error('Error:', error);
+                console.error('errorMessage:', error.message);
+                // alert("服务器连接失败");
+                if (error.message == null || error.message == undefined) alert("服务器错误");
+                else alert(error.message);
+            }
+        </script>
+
         <script>
             url = '/user';
             function forgetPassword() {
@@ -134,11 +146,12 @@
                 .then(data => {
                     // 登录成功
                     if (data.status == "success") {
-                        let userId = form.username.value;
-                        localStorage.setItem('userId', userId);
-                        
+                        localStorage.setItem('userId', data.userid);
+                        localStorage.setItem("userType", data.usertype);
+
                         // 管理员登录
-                        if (userId == 'admin') {
+                        if (form.username.value == 'admin') {
+                            localStorage.setItem('userId', 'admin');
                             window.location.href = 'admin.html';
                         } 
                         // 用户登录
@@ -152,7 +165,6 @@
                             let time = new Date().getTime();
                             localStorage.setItem("loginTime", time); // 记录登录时间，用于计算登录时长
 
-                            localStorage.setItem("userType", data.usertype);
 
                             console.log(`用户${userId}登录，登录时间：${time}`);
                             window.location.href = 'index.html';
@@ -162,8 +174,7 @@
                     else alert("账号或密码错误");
                 })
                 .catch(error => {
-                    console.error('Error:', error);
-                    alert("服务器连接失败");
+                    showError(error);
                 });
             });
         </script>

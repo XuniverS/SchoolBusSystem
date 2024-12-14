@@ -140,7 +140,7 @@
     </style>
 </head>
 <body>
-        <div class="avatar-container" onclick="toggleDropdown()">
+    <div class="avatar-container" onclick="toggleDropdown()">
         <img src="../img/defaultuser.png" alt="User Avatar" class="user-avatar">
         <div class="dropdown-menu" id="dropdownMenu">
             <a href="login.html" class="logout-button">退出登录</a>
@@ -187,11 +187,22 @@
     </div>
     <button class="return-home" onclick="returnHome()">返回主页</button>
 
-    </div>
     <div class="bottom-nav">
         <a href="#basicInfo" class="nav-item active">基本信息</a>
         <a href="#changePassword" class="nav-item">修改密码</a>
     </div>
+
+
+    <!--异常处理-->
+    <script>
+        function showError(error) {
+            console.error('Error:', error);
+            console.error('errorMessage:', error.message);
+            // alert("服务器连接失败");
+            if (error.message == null || error.message == undefined) alert("服务器错误");
+            else alert(error.message);
+        }
+    </script>
 
     <!--登录控制-->
     <script>
@@ -287,8 +298,7 @@
                 displayProfile(data);
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert("服务器连接失败");
+                showError(error);
             });
         }
 
@@ -337,8 +347,7 @@
                 } else alert('更改失败');
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert("服务器连接失败");
+                showError(error);
             });
         });
     </script>
@@ -381,8 +390,7 @@
                 else alert('更改失败');
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert("服务器连接失败");
+                showError(error);
             });
         });
 

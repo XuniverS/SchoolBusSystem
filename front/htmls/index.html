@@ -299,6 +299,18 @@
     </div>
     <p></p>
 
+
+    <!--异常处理-->
+    <script>
+        function showError(error) {
+            console.error('Error:', error);
+            console.error('errorMessage:', error.message);
+            // alert("服务器连接失败");
+            if (error.message == null || error.message == undefined) alert("服务器错误");
+            else alert(error.message);
+        }
+    </script>
+
     <!--登录控制-->
     <script>
         url = '/index';
@@ -450,8 +462,7 @@
                 displaySchedules(data, date);
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert("服务器连接失败");
+                showError(error);
             });
             timeId = setTimeout(querySchedules, 3000, date); // 每3s重新查询一次（主要为了更新余座）
         }
@@ -478,7 +489,7 @@
                         <p>目的地：${schedule.destination}</p>
                         <p>出发时间：${schedule.time}</p>
                         <p id="seatsInfo" class="warn-text">余座：${schedule.seats}</p>
-                        <button onclick="book(${schedule.busId})">预约</button>
+                        <button onclick="book(${schedule.busid})">预约</button>
                     `;
                     busSchedulesContainer.appendChild(scheduleCard);
                 }
@@ -496,8 +507,8 @@
         // 用户发起预约
         function book(curBusId) {
             busId = curBusId;
-            busId = String(busId); // 确保为字符串类型
-            // 点击预约按钮尝试预约，查看状态是否正常
+            // busId = String(busId); // 确保为字符串类型
+
             let json = JSON.stringify({'userid': userId, 'busid': busId});
             console.log(`用户${userId} 预约 班车${busId}`);
             fetch(`${url}/book`, {
@@ -523,8 +534,7 @@
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert("服务器连接失败");
+                showError(error);
             });
         }
 
@@ -564,8 +574,7 @@
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert("服务器连接失败");
+                showError(error);
             });
             modal.style.display = 'none';
         }
@@ -598,8 +607,7 @@
                 displayBooked(data);
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert("服务器连接失败");
+                showError(error);
             });
         }
     
@@ -620,13 +628,13 @@
                     <p>目的地：${schedule.destination}</p>
                     <p>出发时间：${schedule.time}</p>
                     <p>车牌：${schedule.plate}</p>
-                    <button onclick="unbook(${schedule.busId})">取消预约</button>
+                    <button onclick="unbook(${schedule.busid})">取消预约</button>
                 `;
                 busSchedulesContainer.appendChild(scheduleCard);
             });
             
             // 没有已预约班车
-            if (cnt == 0) {
+            if (cnt == 0 || data == null || data.length == 0) {
                 const scheduleCard = document.createElement('div');
                 scheduleCard.innerHTML = `
                     <p>当前没有已预约班车</p>
@@ -638,7 +646,7 @@
         // 取消预约
         function unbook(busId) {
             // 逻辑代码
-            busId = String(busId);
+            // busId = String(busId);
             let json = JSON.stringify({'userid': userId, 'busid': busId});
             console.log(`用户${userId} 取消预约 班车${busId}`);
             fetch(`${url}/unbook`, {
@@ -660,8 +668,7 @@
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert("服务器连接失败");
+                showError(error);
             });
         }
     </script>
@@ -686,8 +693,7 @@
                 displayFinished(data);
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert("服务器连接失败");
+                showError(error);
             });
         }
 
@@ -717,7 +723,7 @@
 
             
             // 没有历史订单
-            if (cnt == 0) {
+            if (cnt == 0 || data == null || data.length == 0) {
                 const scheduleCard = document.createElement('div');
                 scheduleCard.innerHTML = `
                     <p>没有历史记录</p>

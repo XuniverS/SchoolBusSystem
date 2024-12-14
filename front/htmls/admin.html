@@ -296,7 +296,7 @@
                 <label for="email">用户邮箱</label>
                 <input type="text" id="email" name="email" value="" readonly>
 
-                <button type="button" onclick="queryUser()">查询用户信息</button type="button">
+                <button type="button" onclick="queryUser()">查询用户信息</button>
                 <button type="submit">保存更改</button>
                 <button class = "initButton" type="button" onclick="initPassword()">重置该用户密码</button>
             </form>
@@ -324,6 +324,18 @@
 
         </div>
     </div>
+
+
+    <!--异常处理-->
+    <script>
+        function showError(error) {
+            console.error('Error:', error);
+            console.error('errorMessage:', error.message);
+            // alert("服务器连接失败");
+            if (error.message == null || error.message == undefined) alert("服务器错误");
+            else alert(error.message);
+        }
+    </script>
 
     <!--登录控制-->
     <script>
@@ -431,8 +443,7 @@
                 } else alert("添加失败");
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert("服务器连接失败");
+                showError(error);
             });
         });
     </script>
@@ -464,8 +475,7 @@
                 displaySchedules(data);
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert("服务器连接失败");
+                showError(error);
             });
             timeId = setTimeout(querySchedules, 3000, date); // 每3s重新查询一次（主要为了更新余座）
         }
@@ -482,13 +492,13 @@
                 const scheduleCard = document.createElement('div');
                 scheduleCard.className = 'bus-schedule-card';
                 scheduleCard.innerHTML = `
-                    <h3>${schedule.busType}</h3>
+                    <h3>${schedule.bustype}</h3>
                     <p>出发地：${schedule.origin}</p>
                     <p>目的地：${schedule.destination}</p>
                     <p>出发时间：${schedule.time}</p>
                     <p>余座：${schedule.seats}</p>
                     <p>车牌：${schedule.plate}</p>
-                    <button id = "delete-button" class = "delete-button" onclick="deleteBus(${schedule.busId})" >删除</button>
+                    <button id = "delete-button" class = "delete-button" onclick="deleteBus(${schedule.busid})" >删除</button>
                 `;
                 busSchedulesContainer.appendChild(scheduleCard);
             });
@@ -505,7 +515,7 @@
 
         function deleteBus(busId) {
             // 删除班车
-            busId = String(busId);
+            // busId = String(busId);
             let json = JSON.stringify({'busid': busId});
             console.log(`用户${userId} 查询班车`);
             fetch(`${url}/deleteBus`, {
@@ -527,8 +537,7 @@
                 else alert("删除失败");
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert("服务器连接失败");
+                showError(error);
             });
         }
     </script>
@@ -560,8 +569,7 @@
                 else alert("查询失败");
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert("服务器连接失败");
+                showError(error);
             });
         }
 
@@ -604,8 +612,7 @@
                 } else alert('更改失败');
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert("服务器连接失败");
+                showError(error);
             });
         });
 
@@ -655,8 +662,7 @@
                 else alert('重置失败');
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert("服务器连接失败");
+                showError(error);
             });
             modal.style.display = "none";
         }

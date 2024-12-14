@@ -44,7 +44,7 @@ func queryUsersWithUserID(c *gin.Context) {
 		"status":   "success",
 		"usertype": queriedUser.UserType,
 		"username": queriedUser.UserName,
-		"email":    queriedUser.Email,
+		"email":    queriedUser.Email
 	})
 }
 
