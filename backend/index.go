@@ -21,7 +21,7 @@ func RegisterIndexModule(router *gin.Engine) {
 func queryAll(c *gin.Context) {
 	var reqData struct {
 		Date     string `json:"date"`
-		UserType string `json:"userType"`
+		UserType string `json:"usertype"`
 	}
 	if err := c.ShouldBindJSON(&reqData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "参数解析错误"})
@@ -29,7 +29,7 @@ func queryAll(c *gin.Context) {
 	}
 
 	var buses []Bus
-	if reqData.Date == "any" {
+	if reqData.Date == "any" && reqData.UserType == "admin" {
 		result := db.Find(&buses)
 		if result.Error != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "any日期格式错误"})
@@ -43,8 +43,14 @@ func queryAll(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "日期格式错误"})
 		return
 	}
+	var busType string
+	if reqData.UserType == "学生" {
+		busType = "师生车"
+	} else {
+		busType = "教职工车"
+	}
 
-	result := db.Where("date =? AND busType LIKE?", queryDate, "%"+reqData.UserType+"%").Find(&buses)
+	result := db.Where("date =? AND busType LIKE?", queryDate, "%"+busType+"%").Find(&buses)
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "查询失败"})
 		return
@@ -186,7 +192,7 @@ func queryBooked(c *gin.Context) {
 	}
 
 	var bookings []Booking
-	result := db.Where("username =? AND (status = '已预约' OR status = '已支付')", reqData.UserID).Find(&bookings)
+	result := db.Where("userId =? AND (status = '已预约' OR status = '已支付')", reqData.UserID).Find(&bookings)
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "查询预约记录失败"})
 		return
@@ -199,6 +205,10 @@ func queryBooked(c *gin.Context) {
 		if result.Error == nil {
 			bookedBuses = append(bookedBuses, bus)
 		}
+	}
+	if bookedBuses == nil {
+		c.JSON(http.StatusOK, Bus{})
+		return
 	}
 
 	c.JSON(http.StatusOK, bookedBuses)
@@ -259,7 +269,9 @@ func queryFinished(c *gin.Context) {
 			finishedBuses = append(finishedBuses, item)
 		}
 	}
-
+	if finishedBuses == nil {
+		c.JSON(http.StatusOK, Bus{})
+	}
 	c.JSON(http.StatusOK, finishedBuses)
 }
 
