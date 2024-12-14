@@ -49,7 +49,7 @@ func updateUserIsFirstLogin(user *User) int {
 
 func queryUser(user *User) (*User, error) {
 	var queriedUser User
-	result := db.Where("username = ?", user.UserName).Take(&queriedUser)
+	result := db.Where("userId = ?", user.UserID).Take(&queriedUser)
 	if result.Error != nil {
 		return &User{}, result.Error
 	}
