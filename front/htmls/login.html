@@ -85,7 +85,7 @@
             <form id="myForm">
                 <div class="input-icon">
                     <img src="../img/username-icon.png" alt="User Icon">
-                    <input type="text" id="username" name="username" placeholder="请输入学号/工号" required>
+                    <input type="text" id="userid" name="userid" placeholder="请输入学号/工号" required>
                 </div>
                 <div class="input-icon">
                     <img src="../img/password-icon.png" alt="Password Icon">
@@ -112,7 +112,7 @@
                 
                 var form = document.getElementById("myForm"); // 获取表单数据
                 json = JSON.stringify({
-                    'username': form.username.value,
+                    'userid': form.userid.value,
                     'password': form.password.value
                 })
 
@@ -136,6 +136,7 @@
                     if (data.status == "success") {
                         let userId = form.username.value;
                         localStorage.setItem('userId', userId);
+                        localStorage.setItem("userType", data.usertype);
                         
                         // 管理员登录
                         if (userId == 'admin') {
@@ -147,12 +148,8 @@
                             if (data.isfirstlogin == "1") {
                                 alert("当前为初次登录，请尽快修改密码");
                             }
-
-
                             let time = new Date().getTime();
                             localStorage.setItem("loginTime", time); // 记录登录时间，用于计算登录时长
-
-                            localStorage.setItem("userType", data.usertype);
 
                             console.log(`用户${userId}登录，登录时间：${time}`);
                             window.location.href = 'index.html';
