@@ -42,7 +42,7 @@ func queryUsersWithUserID(c *gin.Context) {
 	// 成功返回用户信息
 	c.JSON(http.StatusOK, gin.H{
 		"status":   "success",
-		"userType": queriedUser.UserType,
+		"usertype": queriedUser.UserType,
 		"username": queriedUser.UserName,
 		"email":    queriedUser.Email,
 	})
