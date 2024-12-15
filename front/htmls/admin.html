@@ -401,29 +401,24 @@
                 return;
             }
 
-            // 验证日期格式是否合法
-            const parsedDate = dayjs(date, 'YYYY-MM-DD', true);
-            if (!parsedDate.isValid()) {
-                alert("日期格式错误，请按照YYYY-MM-DD格式输入");
-                return;
-            }
-
             // 验证时间
-            const busDateTime = dayjs(`${date} ${time}`);
-            const now = dayjs();
-            if (busDateTime.isBefore(now)) {
-                alert("不能添加过去的班车");
-                return;
+            {
+                let bustime = new Date(date + " " + time);
+                let now = new Date();
+                if (bustime - now < 0) {
+                    alert("不能添加过去的班车");
+                    return;
+                }
             }
 
             let json = JSON.stringify({
                 "origin": origin,
                 'destination': destination,
                 'bustype': busType,
-                'date': date,
+                'date': encodeURIComponent(date),
                 'time': time,
                 'plate': plate,
-                'seats': seats
+                'totleseats': seats
             });
             console.log(json);
             // 发送请求
@@ -496,7 +491,7 @@
                     <p>出发地：${schedule.origin}</p>
                     <p>目的地：${schedule.destination}</p>
                     <p>出发时间：${schedule.time}</p>
-                    <p>余座：${schedule.seats}</p>
+                    <p>余座：${schedule.availableseats}</p>
                     <p>车牌：${schedule.plate}</p>
                     <button id = "delete-button" class = "delete-button" onclick="deleteBus(${schedule.busid})" >删除</button>
                 `;

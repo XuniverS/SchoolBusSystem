@@ -21,6 +21,7 @@ func main() {
 	backend.RegisterIndexModule(router)
 
 	router.Static("/htmls", "./front/htmls")
+	router.Static("/img", "./front/img")
 
 	router.Run(":8000")
 

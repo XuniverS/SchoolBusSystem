@@ -35,7 +35,7 @@ func queryAll(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "any日期格式错误"})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"status": "success", "message": buses})
+		c.JSON(http.StatusOK, buses)
 		return
 	}
 	queryDate, err := time.Parse("2006-01-02", reqData.Date)
@@ -70,7 +70,7 @@ func book(c *gin.Context) {
 	}
 
 	var existingBooking Booking
-	result := db.Where("userId =? AND busId =?", reqData.UserId, reqData.BusId).Take(&existingBooking)
+	result := db.Where("userId =? AND busId =? AND status =?", reqData.UserId, reqData.BusId, "已预约").Take(&existingBooking)
 	if result.Error == nil {
 		c.JSON(http.StatusOK, gin.H{"status": "booked"})
 		return
@@ -88,22 +88,6 @@ func book(c *gin.Context) {
 		return
 	}
 
-	newBooking := Booking{
-		UserId: reqData.UserId,
-		BusId:  reqData.BusId,
-		Status: "已预约",
-	}
-	if err := insertBooking(&newBooking); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "预约失败"})
-		return
-	}
-
-	bus.AvailableSeats--
-	if err := updateBus(&bus); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "更新班车座位信息失败"})
-		return
-	}
-
 	c.JSON(http.StatusOK, gin.H{"status": "available"})
 }
 
@@ -116,21 +100,30 @@ func payed(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "参数解析错误"})
 		return
 	}
-
-	var booking Booking
-	result := db.Where("userId =? AND busId =?", reqData.UserId, reqData.BusId).Take(&booking)
+	var bus Bus
+	result := db.Where("busId =?", reqData.BusId).Take(&bus)
 	if result.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "查询预约记录失败"})
+		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "查询班车信息失败"})
 		return
 	}
 
-	if booking.Status != "已预约" {
-		c.JSON(http.StatusOK, gin.H{"status": "fail", "message": "该预约记录状态不符合支付要求"})
+	bus.AvailableSeats--
+	if err := updateBus(&bus); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "更新班车座位信息失败"})
 		return
 	}
 
-	booking.Status = "已支付"
-	result = db.Save(&booking)
+	newBooking := Booking{
+		UserId: reqData.UserId,
+		BusId:  reqData.BusId,
+		Status: "已预约",
+	}
+	if err := insertBooking(&newBooking); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "预约失败"})
+		return
+	}
+
+	result = db.Save(&newBooking)
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "更新预约记录状态失败"})
 		return
@@ -148,12 +141,14 @@ func unbook(c *gin.Context) {
 		return
 	}
 
-	var booking Booking
-	result := db.Where("userId =? AND busId =?", reqData.UserId, reqData.BusId).Take(&booking)
+	var a Booking
+	result := db.Where("userId =? AND busId =?", reqData.UserId, reqData.BusId).Take(&a)
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "查询预约记录失败"})
 		return
 	}
+	var booking Booking
+	result = db.Where("userId =? AND busId =? AND status =?", a.UserId, a.BusId, "已预约").Take(&booking)
 
 	if booking.Status != "已预约" && booking.Status != "已支付" {
 		c.JSON(http.StatusOK, gin.H{"status": "fail", "message": "该预约记录不符合取消条件"})
@@ -207,7 +202,7 @@ func queryBooked(c *gin.Context) {
 		}
 	}
 	if bookedBuses == nil {
-		c.JSON(http.StatusOK, Bus{})
+		c.JSON(http.StatusOK, nil)
 		return
 	}
 

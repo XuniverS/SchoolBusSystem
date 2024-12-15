@@ -32,7 +32,7 @@ func userLogin(c *gin.Context) {
 	}
 	hashString := shaEncode(user.Password)
 	if hashString != queriedUser.Password {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "fail"})
+		c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "账号或密码错误"})
 		return
 	}
 

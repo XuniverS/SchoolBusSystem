@@ -157,7 +157,7 @@
                         // 用户登录
                         else {
                             // 初次登录提醒修改密码
-                            if (data.isfirstlogin == "1") {
+                            if (data.isfirstlogin == 1) {
                                 alert("当前为初次登录，请尽快修改密码");
                             }
 
@@ -166,7 +166,7 @@
                             localStorage.setItem("loginTime", time); // 记录登录时间，用于计算登录时长
 
 
-                            console.log(`用户${userId}登录，登录时间：${time}`);
+                            console.log(`用户${data.userid}登录，登录时间：${time}`);
                             window.location.href = 'index.html';
                         }
                     }
