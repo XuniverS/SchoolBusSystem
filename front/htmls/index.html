@@ -488,7 +488,7 @@
                         <p>出发地：${schedule.origin}</p>
                         <p>目的地：${schedule.destination}</p>
                         <p>出发时间：${schedule.time}</p>
-                        <p id="seatsInfo" class="warn-text">余座：${schedule.seats}</p>
+                        <p id="seatsInfo" class="warn-text">余座：${schedule.availableseats}</p>
                         <button onclick="book(${schedule.busid})">预约</button>
                     `;
                     busSchedulesContainer.appendChild(scheduleCard);
@@ -616,13 +616,19 @@
             const busSchedulesContainer = document.querySelector('.bus-booked-cards');
             busSchedulesContainer.innerHTML = ''; // 清空现有班次信息
             
-            var cnt = 0;
-
-            data.forEach(schedule => {
-                cnt++;
+            // 没有已预约班车
+            if (data == null || data.length == 0) {
                 const scheduleCard = document.createElement('div');
-                scheduleCard.className = 'bus-schedule-card';
                 scheduleCard.innerHTML = `
+                    <p>当前没有已预约班车</p>
+                `;
+                busSchedulesContainer.appendChild(scheduleCard);
+            }
+            else {
+                data.forEach(schedule => {
+                    const scheduleCard = document.createElement('div');
+                    scheduleCard.className = 'bus-schedule-card';
+                    scheduleCard.innerHTML = `
                     <h3>${schedule.bustype}</h3>
                     <p>出发地：${schedule.origin}</p>
                     <p>目的地：${schedule.destination}</p>
@@ -630,17 +636,11 @@
                     <p>车牌：${schedule.plate}</p>
                     <button onclick="unbook(${schedule.busid})">取消预约</button>
                 `;
-                busSchedulesContainer.appendChild(scheduleCard);
-            });
-            
-            // 没有已预约班车
-            if (cnt == 0 || data == null || data.length == 0) {
-                const scheduleCard = document.createElement('div');
-                scheduleCard.innerHTML = `
-                    <p>当前没有已预约班车</p>
-                `;
-                busSchedulesContainer.appendChild(scheduleCard);
+                    busSchedulesContainer.appendChild(scheduleCard);
+                });
             }
+            
+
         }
 
         // 取消预约
