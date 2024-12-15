@@ -15,6 +15,7 @@ func RegisterSetupRoutes(router *gin.Engine) {
 		busRoutes.POST("/deleteBus", removeBus)
 		busRoutes.POST("/queryAll", queryAll)
 		busRoutes.POST("/queryUser", queryUsersWithUserID)
+		busRoutes.POST("/initPassword", initPasswordWithUserID)
 	}
 }
 
@@ -96,4 +97,25 @@ func deleteBus(busId int) map[string]interface{} {
 		return map[string]interface{}{"status": "fail", "message": "删除操作未影响任何记录，可能已被删除或其他原因"}
 	}
 	return map[string]interface{}{"status": "success", "message": "删除成功"}
+}
+
+func initPasswordWithUserID(c *gin.Context) {
+	var user User
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail"})
+		return
+	}
+	result := db.Where("userId =?", user.UserID).Take(&user)
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail"})
+		return
+	}
+	// 初始密码123456Aa
+	user.Password = "b17e1e0450dac425ea318253f6f852972d69731d6c7499c001468b695b6da219"
+	result = db.Save(&user)
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"status": "success"})
 }
