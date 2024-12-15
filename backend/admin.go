@@ -2,11 +2,10 @@ package backend
 
 import (
 	"errors"
+	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"net/http"
 	"time"
-
-	"github.com/gin-gonic/gin"
 )
 
 func RegisterSetupRoutes(router *gin.Engine) {
@@ -20,17 +19,36 @@ func RegisterSetupRoutes(router *gin.Engine) {
 }
 
 func addBus(c *gin.Context) {
-	var bus Bus
-	if err := c.ShouldBindJSON(&bus); err != nil {
+	var requestBus struct {
+		Origin      string `gorm:"column:origin" json:"origin"`
+		Destination string `gorm:"column:destination" json:"destination"`
+		BusType     string `gorm:"column:busType" json:"bustype"`
+		Date        string `gorm:"column:date" json:"date"`
+		Time        string `gorm:"column:time" json:"time"`
+		Plate       string `gorm:"column:plate" json:"plate"`
+		TotalSeats  int    `gorm:"column:total_seats" json:"totalseats"`
+	}
+
+	if err := c.ShouldBindJSON(&requestBus); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
-	if bus.BusType != "师生车" && bus.BusType != "教职工车" {
-		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "班车类型错误！仅限为师生车或教职工车"})
+	var bus Bus
+	busDate, err := time.Parse("2006-01-02", requestBus.Date)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "日期格式错误"})
 		return
 	}
-	if bus.Date.Before(time.Now()) {
-		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "错误的时间！"})
+	bus.Origin = requestBus.Origin
+	bus.Destination = requestBus.Destination
+	bus.BusType = requestBus.BusType
+	bus.Date = busDate
+	bus.Time = requestBus.Time
+	bus.Plate = requestBus.Plate
+	bus.TotalSeats = requestBus.TotalSeats
+
+	if bus.BusType != "师生车" && bus.BusType != "教职工车" {
+		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "班车类型错误！仅限为师生车或教职工车"})
 		return
 	}
 

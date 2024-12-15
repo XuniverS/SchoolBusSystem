@@ -401,26 +401,21 @@
                 return;
             }
 
-            // 验证日期格式是否合法
-            const parsedDate = dayjs(date, 'YYYY-MM-DD', true);
-            if (!parsedDate.isValid()) {
-                alert("日期格式错误，请按照YYYY-MM-DD格式输入");
-                return;
-            }
-
             // 验证时间
-            const busDateTime = dayjs(`${date} ${time}`);
-            const now = dayjs();
-            if (busDateTime.isBefore(now)) {
-                alert("不能添加过去的班车");
-                return;
+            {
+                let bustime = new Date(date + " " + time);
+                let now = new Date();
+                if (bustime - now < 0) {
+                    alert("不能添加过去的班车");
+                    return;
+                }
             }
 
             let json = JSON.stringify({
                 "origin": origin,
                 'destination': destination,
                 'bustype': busType,
-                'date': date,
+                'date': encodeURIComponent(date),
                 'time': time,
                 'plate': plate,
                 'totleseats': seats
