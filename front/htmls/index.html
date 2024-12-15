@@ -456,7 +456,13 @@
                 },
                 body: json
             })
-            .then(response => response.json())
+            .then(response => {
+                // 检查响应状态是否成功
+                if (!response.ok) {
+                    throw new Error(response.json().message);
+                }
+                return response.json(); // 解析JSON数据
+            })
             .then(data => {
                 // 处理后端返回的数据
                 displaySchedules(data, date);
@@ -518,7 +524,13 @@
                 },
                 body: json
             })
-            .then(response => response.json())
+            .then(response => {
+                // 检查响应状态是否成功
+                if (!response.ok) {
+                    throw new Error(response.json().message);
+                }
+                return response.json(); // 解析JSON数据
+            })
             .then(data => {
                 // 处理后端返回的数据
                 let s = data.status;
@@ -563,7 +575,13 @@
                 },
                 body: json
             })
-            .then(response => response.json())
+            .then(response => {
+                // 检查响应状态是否成功
+                if (!response.ok) {
+                    throw new Error(response.json().message);
+                }
+                return response.json(); // 解析JSON数据
+            })
             .then(data => {
                 // 处理后端返回的数据
                 let s = data.status;
@@ -601,7 +619,13 @@
                 },
                 body: json
             })
-            .then(response => response.json())
+            .then(response => {
+                // 检查响应状态是否成功
+                if (!response.ok) {
+                    throw new Error(response.json().message);
+                }
+                return response.json(); // 解析JSON数据
+            })
             .then(data => {
                 // 处理后端返回的数据
                 displayBooked(data);
@@ -656,7 +680,13 @@
                 },
                 body: json
             })
-            .then(response => response.json())
+            .then(response => {
+                // 检查响应状态是否成功
+                if (!response.ok) {
+                    throw new Error(response.json().message);
+                }
+                return response.json(); // 解析JSON数据
+            })
             .then(data => {
                 // 处理后端返回的数据
                 let s = data.status;
@@ -687,7 +717,13 @@
                 },
                 body: json
             })
-            .then(response => response.json())
+            .then(response => {
+                // 检查响应状态是否成功
+                if (!response.ok) {
+                    throw new Error(response.json().message);
+                }
+                return response.json(); // 解析JSON数据
+            })
             .then(data => {
                 // 处理后端返回的数据
                 displayFinished(data);
