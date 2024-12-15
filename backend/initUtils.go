@@ -21,7 +21,7 @@ type User struct {
 	UserName       string    `gorm:"column:username" json:"username"`
 	Email          string    `gorm:"column:Email" json:"email"`
 	Password       string    `gorm:"column:password" json:"password"`
-	Is_first_login bool      `gorm:"column:is_First_Login" json:"isfirstlogin"`
+	Is_first_login int       `gorm:"column:is_First_Login" json:"isfirstlogin"`
 	CreatedTime    time.Time `gorm:"column:created_At" json:"createdtime"`
 }
 
