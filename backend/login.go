@@ -1,12 +1,11 @@
 package backend
 
 import (
-	"errors"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
-	"net/http"
-	"time"
-
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 func RegisterUserModule(router *gin.Engine) {
@@ -41,37 +40,6 @@ func userLogin(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "success", "userid": queriedUser.UserID, "usertype": queriedUser.UserType, "isfirstlogin": updateUserIsFirstLogin(queriedUser)})
 }
 
-// 模拟的 updateUserIsFirstLogin 函数
-func updateUserIsFirstLogin(user *User) int {
-	if user.Is_first_login {
-		return 1
-	}
-	return 0
-}
-
-// 模拟的 queryUser 函数
-func queryUser(user *User) (*User, error) {
-	// 这里返回一个固定的用户，模拟数据库查询
-	if user.UserName == "user123" {
-		return &User{
-			UserID:         "1",
-			UserType:       "admin",
-			Password:       "hashed_password",
-			Is_first_login: true,
-			CreatedTime:    time.Now(),
-		}, nil
-	}
-	return nil, errors.New("user not found")
-}
-
-/*func updateUserIsFirstLogin(user *User) int {
-	if user.Is_first_login {
-		db.Model(&User{}).Where("userId =?", user.UserID).Update("is_first_login", 0)
-		return 1
-	}
-	return 0
-}
-
 func queryUser(user *User) (*User, error) {
 	var queriedUser User
 	result := db.Where("username = ?", user.UserName).Take(&queriedUser)
@@ -79,7 +47,14 @@ func queryUser(user *User) (*User, error) {
 		return &User{}, result.Error
 	}
 	return &queriedUser, nil
-}*/
+}
+func updateUserIsFirstLogin(user *User) int {
+	if user.Is_first_login {
+		db.Model(&User{}).Where("userId =?", user.UserID).Update("is_first_login", 0)
+		return 1
+	}
+	return 0
+}
 
 func userSignIn(c *gin.Context) {
 	var user User
@@ -105,15 +80,7 @@ func insertUser(user *User) error {
 	return result.Error
 }
 
-// 模拟的 shaEncode 函数
-func shaEncode(password string) string {
-	if password == "123456Aa" {
-		return "hashed_password" // 模拟加密后的密码
-	}
-	return ""
-}
-
-/*func shaEncode(p string) string {
+func shaEncode(p string) string {
 	hashBytes := sha256.Sum256([]byte(p))
 	return hex.EncodeToString(hashBytes[:])
-}*/
+}

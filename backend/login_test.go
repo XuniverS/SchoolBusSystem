@@ -11,7 +11,7 @@ import (
 	"testing"
 )
 
-// MockDB 用于模拟数据库
+// MockDB 结构体模拟数据库
 type MockDB struct {
 	mock.Mock
 }
@@ -26,11 +26,85 @@ func (mdb *MockDB) Take(dest interface{}) *MockDB {
 	return mdb
 }
 
-func (mdb *MockDB) Update(column string, value interface{}) *MockDB {
-	mdb.Called(column, value)
-	return mdb
+// queryUser 函数，模拟数据库查询
+/*func queryUser(user *User) (*User, error) {
+	var queriedUser User
+	// 这里用 db 的 Where 和 Take 方法模拟查询
+	result := db.Where("username = ?", user.UserName).Take(&queriedUser)
+	if result.Error != nil {
+		return &User{}, result.Error
+	}
+	return &queriedUser, nil
+}*/
+
+// 测试函数
+/*func TestQueryUser(t *testing.T) {
+	// 创建 MockDB 实例
+	mdb := new(MockDB)
+
+	// 创建一个模拟的 User
+	mockUser := &User{
+		UserID:   "123",
+		UserName: "user123",
+		Password: "password123",
+	}
+
+	// 设置期望：调用 db.Where 和 db.Take 时返回 mockUser
+	mdb.On("Where", "username = ?", "user123").Return(mdb) // 模拟查询条件
+	mdb.On("Take", mock.Anything).Run(func(args mock.Arguments) {
+		// 模拟 db.Take 将 mockUser 填充到 dest 参数中
+		*args.Get(0).(*User) = *mockUser
+	}).Return(mdb)
+
+	// 使用 mockDB 替代真实 db
+	//db = mdb
+
+	// 执行 queryUser，应该返回 mockUser
+	user := &User{UserName: "user123"}
+	queriedUser, err := queryUser(user)
+
+	// 断言结果
+	assert.NoError(t, err)
+	assert.Equal(t, mockUser.UserID, queriedUser.UserID)
+	assert.Equal(t, mockUser.UserName, queriedUser.UserName)
+	assert.Equal(t, mockUser.Password, queriedUser.Password)
+
+	// 验证期望的调用
+	mdb.AssertExpectations(t)
 }
 
+/*
+// 模拟的 shaEncode 函数
+func shaEncode(password string) string {
+	if password == "123456Aa" {
+		return "hashed_password" // 模拟加密后的密码
+	}
+	return ""
+}
+
+// 模拟的 updateUserIsFirstLogin 函数
+func updateUserIsFirstLogin(user *User) int {
+	if user.Is_first_login {
+		return 1
+	}
+	return 0
+}
+
+// 模拟的 queryUser 函数
+func queryUser(user *User) (*User, error) {
+	// 这里返回一个固定的用户，模拟数据库查询
+	if user.UserName == "user123" {
+		return &User{
+			UserID:         "1",
+			UserType:       "admin",
+			Password:       "hashed_password",
+			Is_first_login: true,
+			CreatedTime:    time.Now(),
+		}, nil
+	}
+	return nil, errors.New("user not found")
+}
+*/
 // 单元测试
 func TestUserLogin(t *testing.T) {
 	// 初始化 Gin engine
@@ -69,7 +143,7 @@ func TestUserLogin(t *testing.T) {
 		assert.Equal(t, "success", response["status"])
 		assert.Equal(t, "1", response["userid"])
 		assert.Equal(t, "admin", response["usertype"])
-		assert.Equal(t, float64(1), response["isfirstlogin"])
+		assert.Equal(t, 1, response["isfirstlogin"])
 	})
 
 	/*// 错误的密码测试
