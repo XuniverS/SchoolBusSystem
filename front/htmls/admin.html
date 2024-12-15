@@ -423,7 +423,7 @@
                 'date': date,
                 'time': time,
                 'plate': plate,
-                'seats': seats
+                'totleseats': seats
             });
             console.log(json);
             // 发送请求
@@ -496,7 +496,7 @@
                     <p>出发地：${schedule.origin}</p>
                     <p>目的地：${schedule.destination}</p>
                     <p>出发时间：${schedule.time}</p>
-                    <p>余座：${schedule.seats}</p>
+                    <p>余座：${schedule.availableseats}</p>
                     <p>车牌：${schedule.plate}</p>
                     <button id = "delete-button" class = "delete-button" onclick="deleteBus(${schedule.busid})" >删除</button>
                 `;
