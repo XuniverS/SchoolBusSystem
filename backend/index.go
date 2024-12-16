@@ -1,6 +1,7 @@
 package backend
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"time"
@@ -24,6 +25,7 @@ func queryAll(c *gin.Context) {
 		UserType string `json:"usertype"`
 	}
 	if err := c.ShouldBindJSON(&reqData); err != nil {
+		fmt.Printf("1111")
 		c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "参数解析错误"})
 		return
 	}
@@ -32,6 +34,7 @@ func queryAll(c *gin.Context) {
 	if reqData.Date == "any" && reqData.UserType == "admin" {
 		result := db.Find(&buses)
 		if result.Error != nil {
+			fmt.Printf("2222")
 			c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "any日期格式错误"})
 			return
 		}
@@ -40,6 +43,7 @@ func queryAll(c *gin.Context) {
 	}
 	queryDate, err := time.Parse("2006-01-02", reqData.Date)
 	if err != nil {
+		fmt.Printf("3333")
 		c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "日期格式错误"})
 		return
 	}
@@ -103,17 +107,19 @@ func payed(c *gin.Context) {
 	var bus Bus
 	result := db.Where("busId =?", reqData.BusId).Take(&bus)
 	if result.Error != nil {
+		fmt.Printf("1111111111\n")
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "查询班车信息失败"})
 		return
 	}
 
 	bus.AvailableSeats--
 	if err := updateBus(&bus); err != nil {
+		fmt.Println(err)
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "更新班车座位信息失败"})
 		return
 	}
 
-	newBooking := Booking{
+	/*newBooking := Booking{
 		UserId: reqData.UserId,
 		BusId:  reqData.BusId,
 		Status: "已预约",
@@ -127,7 +133,7 @@ func payed(c *gin.Context) {
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "更新预约记录状态失败"})
 		return
-	}
+	}*/
 
 	c.JSON(http.StatusOK, gin.H{"status": "success"})
 }

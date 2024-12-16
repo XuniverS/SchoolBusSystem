@@ -30,20 +30,13 @@ func userLogin(c *gin.Context) {
 	}
 	hashString := shaEncode(user.Password)
 	if hashString != queriedUser.Password {
-<<<<<<< HEAD
-		fmt.Printf("shaEncode\n")
-		c.JSON(http.StatusBadRequest, gin.H{"status": "fail"})
-=======
 		c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "账号或密码错误"})
->>>>>>> origin/master
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"status": "success", "userid": queriedUser.UserID, "usertype": queriedUser.UserType, "isfirstlogin": updateUserIsFirstLogin(queriedUser)})
 }
 
-<<<<<<< HEAD
-=======
 func updateUserIsFirstLogin(user *User) int {
 	if user.Is_first_login == 1 {
 		db.Model(&User{}).Where("userId =?", user.UserID).Update("is_first_login", 0)
@@ -52,7 +45,6 @@ func updateUserIsFirstLogin(user *User) int {
 	return 0
 }
 
->>>>>>> origin/master
 func queryUser(user *User) (*User, error) {
 	var queriedUser User
 	result := db.Where("username = ?", user.UserName).Take(&queriedUser)
@@ -60,14 +52,6 @@ func queryUser(user *User) (*User, error) {
 		return &User{}, result.Error
 	}
 	return &queriedUser, nil
-}
-
-func updateUserIsFirstLogin(user *User) int {
-	if user.Is_first_login {
-		db.Model(&User{}).Where("userId =?", user.UserID).Update("is_first_login", 0)
-		return 1
-	}
-	return 0
 }
 
 func userSignIn(c *gin.Context) {

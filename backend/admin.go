@@ -2,6 +2,7 @@ package backend
 
 import (
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"net/http"
@@ -71,6 +72,9 @@ func removeBus(c *gin.Context) {
 
 func insertBus(bus *Bus) error {
 	result := db.Create(bus)
+	if result.Error != nil {
+		fmt.Println("Error inserting bus:", result.Error)
+	}
 	return result.Error
 }
 
