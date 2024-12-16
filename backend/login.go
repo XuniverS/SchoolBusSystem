@@ -3,9 +3,9 @@ package backend
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"net/http"
-
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 func RegisterUserModule(router *gin.Engine) {
@@ -27,7 +27,7 @@ func userLogin(c *gin.Context) {
 
 	queriedUser, err := queryUser(&user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail"})
+		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "账号或密码错误"})
 		return
 	}
 	hashString := shaEncode(user.Password)
@@ -70,11 +70,12 @@ func userSignIn(c *gin.Context) {
 	user.Is_first_login = 1
 	user.Password = shaEncode(user.Password)
 	if err := insertUser(&user); err != nil {
+		fmt.Println(err)
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "插入用户失败"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "用户注册成功"})
+	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "用户注册成功"})
 }
 
 func insertUser(user *User) error {

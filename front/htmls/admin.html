@@ -251,7 +251,7 @@
                 <label for="destination">目的地</label>
                 <input type="text" id="destination" name="destination" value="" required>
 
-                <label for="busType">班车类型（师生车/教职工车）</label>
+                <label for="busType">班车类型</label>
                 <select id="busType" name="busType" required>
                     <option value="">请选择...</option>
                     <option value="师生车">师生车</option>
@@ -748,7 +748,7 @@
             });
 
             // 发送请求注册用户
-            fetch(`user/signin`, { // url是多少
+            fetch(`/user/signin`, { // url是多少
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
