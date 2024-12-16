@@ -51,7 +51,10 @@ func queryUser(user *User) (*User, error) {
 	var queriedUser User
 	result := db.Where("username = ?", user.UserName).Take(&queriedUser)
 	if result.Error != nil {
-		return &User{}, result.Error
+		result = db.Where("userId = ?", user.UserName).Take(&queriedUser)
+		if result.Error != nil {
+			return &User{}, result.Error
+		}
 	}
 	return &queriedUser, nil
 }

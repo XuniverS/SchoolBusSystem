@@ -274,7 +274,7 @@ func queryFinished(c *gin.Context) {
 		}
 	}
 	if finishedBuses == nil {
-		c.JSON(http.StatusOK, Bus{})
+		c.JSON(http.StatusOK, nil)
 	}
 	c.JSON(http.StatusOK, finishedBuses)
 }
