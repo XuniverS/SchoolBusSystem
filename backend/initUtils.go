@@ -16,13 +16,12 @@ type Booking struct {
 }
 
 type User struct {
-	UserID         string    `gorm:"column:userId;primaryKey" json:"userid"`
-	UserType       string    `gorm:"column:userType" json:"usertype"`
-	UserName       string    `gorm:"column:username" json:"username"`
-	Email          string    `gorm:"column:Email" json:"email"`
-	Password       string    `gorm:"column:password" json:"password"`
-	Is_first_login int       `gorm:"column:is_First_Login" json:"isfirstlogin"`
-	CreatedTime    time.Time `gorm:"column:created_At" json:"createdtime"`
+	UserID         string `gorm:"column:userId;primaryKey" json:"userid"`
+	UserType       string `gorm:"column:userType" json:"usertype"`
+	UserName       string `gorm:"column:username" json:"username"`
+	Email          string `gorm:"column:Email" json:"email"`
+	Password       string `gorm:"column:password" json:"password"`
+	Is_first_login int    `gorm:"column:is_First_Login" json:"isfirstlogin"`
 }
 
 type Bus struct {
