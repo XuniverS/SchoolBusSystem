@@ -3,27 +3,75 @@ package backend
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 	"net/http"
 	"net/http/httptest"
+	"regexp"
 	"testing"
 )
 
-// MockDB 结构体模拟数据库
-type MockDB struct {
-	mock.Mock
-}
+// queryUser 函数
+/*func queryUser(user *User) (*User, error) {
+	var queriedUser User
+	result := db.Where("username = ?", user.UserName).Take(&queriedUser)
+	if result.Error != nil {
+		return &User{}, result.Error
+	}
+	return &queriedUser, nil
+}*/
 
-func (mdb *MockDB) Where(query string, args ...interface{}) *MockDB {
-	mdb.Called(query, args)
-	return mdb
-}
+func TestQueryUser(t *testing.T) {
+	// 使用 sqlmock 创建一个 mock 数据库连接
+	mockDB, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("Failed to create mock database: %v", err)
+	}
+	defer mockDB.Close()
 
-func (mdb *MockDB) Take(dest interface{}) *MockDB {
-	mdb.Called(dest)
-	return mdb
+	// 模拟 SELECT VERSION() 查询（gourm 会执行这个查询来检查数据库连接）
+	mock.ExpectQuery("SELECT VERSION()").
+		WillReturnRows(sqlmock.NewRows([]string{"Version"}).AddRow("5.7.33"))
+
+	// 使用 gorm.Open 配合 sqlmock 模拟数据库连接
+	gormDB, err := gorm.Open(mysql.New(mysql.Config{Conn: mockDB}), &gorm.Config{})
+	if err != nil {
+		t.Fatalf("Failed to open gorm DB: %v", err)
+	}
+	db = gormDB // 将 db 赋值为 mock gormDB
+
+	// 定义要查询的用户
+	userToQuery := &User{
+		UserName: "user123",
+	}
+
+	// 定义期望的查询 SQL 及其结果
+	rows := sqlmock.NewRows([]string{"userId", "username", "password"}).
+		AddRow("1", "user123", "hashed_password")
+
+	// 模拟查询操作
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `users` WHERE username = ? LIMIT ?")).
+		WithArgs(userToQuery.UserName, 1).
+		WillReturnRows(rows)
+
+	// 调用 queryUser 函数进行查询
+	queriedUser, err := queryUser(userToQuery)
+
+	// 验证查询结果
+	assert.NoError(t, err)
+	assert.NotNil(t, queriedUser)
+	assert.Equal(t, "user123", queriedUser.UserName)
+	assert.Equal(t, "1", queriedUser.UserID)
+	assert.Equal(t, "hashed_password", queriedUser.Password)
+
+	// 确保所有预期的操作都已执行
+	err = mock.ExpectationsWereMet()
+	if err != nil {
+		t.Errorf("There were unmet expectations: %s", err)
+	}
 }
 
 // queryUser 函数，模拟数据库查询
@@ -36,42 +84,6 @@ func (mdb *MockDB) Take(dest interface{}) *MockDB {
 	}
 	return &queriedUser, nil
 }*/
-
-// 测试函数
-/*func TestQueryUser(t *testing.T) {
-	// 创建 MockDB 实例
-	mdb := new(MockDB)
-
-	// 创建一个模拟的 User
-	mockUser := &User{
-		UserID:   "123",
-		UserName: "user123",
-		Password: "password123",
-	}
-
-	// 设置期望：调用 db.Where 和 db.Take 时返回 mockUser
-	mdb.On("Where", "username = ?", "user123").Return(mdb) // 模拟查询条件
-	mdb.On("Take", mock.Anything).Run(func(args mock.Arguments) {
-		// 模拟 db.Take 将 mockUser 填充到 dest 参数中
-		*args.Get(0).(*User) = *mockUser
-	}).Return(mdb)
-
-	// 使用 mockDB 替代真实 db
-	//db = mdb
-
-	// 执行 queryUser，应该返回 mockUser
-	user := &User{UserName: "user123"}
-	queriedUser, err := queryUser(user)
-
-	// 断言结果
-	assert.NoError(t, err)
-	assert.Equal(t, mockUser.UserID, queriedUser.UserID)
-	assert.Equal(t, mockUser.UserName, queriedUser.UserName)
-	assert.Equal(t, mockUser.Password, queriedUser.Password)
-
-	// 验证期望的调用
-	mdb.AssertExpectations(t)
-}
 
 /*
 // 模拟的 shaEncode 函数
@@ -115,6 +127,42 @@ func TestUserLogin(t *testing.T) {
 
 	// 正常登录测试
 	t.Run("Valid Login", func(t *testing.T) {
+		// 使用 sqlmock 创建一个 mock 数据库连接
+		mockDB, mock, err := sqlmock.New()
+		if err != nil {
+			t.Fatalf("Failed to create mock database: %v", err)
+		}
+		defer mockDB.Close()
+
+		// 模拟 SELECT VERSION() 查询（gourm 会执行这个查询来检查数据库连接）
+		mock.ExpectQuery("SELECT VERSION()").
+			WillReturnRows(sqlmock.NewRows([]string{"Version"}).AddRow("5.7.33"))
+
+		// 使用 gorm.Open 配合 sqlmock 模拟数据库连接
+		gormDB, err := gorm.Open(mysql.New(mysql.Config{Conn: mockDB}), &gorm.Config{})
+		if err != nil {
+			t.Fatalf("Failed to open gorm DB: %v", err)
+		}
+		db = gormDB // 将 db 赋值为 mock gormDB
+
+		// 定义要查询的用户
+		userToQuery := &User{
+			UserName: "user123",
+			UserID:   "1",
+		}
+
+		// 定义期望的查询 SQL 及其结果
+		rows := sqlmock.NewRows([]string{"userId", "userType", "username", "password", "Is_first_login"}).
+			AddRow("1", "admin", "user123", "hashed_password", "1")
+
+		// 模拟查询操作
+		mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `users` WHERE username = ? LIMIT ?")).
+			WithArgs(userToQuery.UserName, 1).
+			WillReturnRows(rows)
+		// 模拟更新操作
+		mock.ExpectExec(regexp.QuoteMeta("UPDATE `users` SET `is_first_login` = ? WHERE `userId` = ?")).
+			WithArgs(0, userToQuery.UserID).
+			WillReturnResult(sqlmock.NewResult(1, 1)) // 假设更新了 1 条记录
 		// 构造请求数据
 		input := map[string]string{
 			"username": "user123",
@@ -136,14 +184,14 @@ func TestUserLogin(t *testing.T) {
 
 		// 解析响应体
 		var response map[string]interface{}
-		err := json.Unmarshal(w.Body.Bytes(), &response)
+		err = json.Unmarshal(w.Body.Bytes(), &response)
 		assert.NoError(t, err) // 确保 JSON 解析没有错误
 
 		// 验证响应内容
 		assert.Equal(t, "success", response["status"])
 		assert.Equal(t, "1", response["userid"])
 		assert.Equal(t, "admin", response["usertype"])
-		assert.Equal(t, 1, response["isfirstlogin"])
+		assert.Equal(t, float64(1), response["isfirstlogin"])
 	})
 
 	/*// 错误的密码测试

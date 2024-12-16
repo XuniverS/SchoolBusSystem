@@ -2,6 +2,7 @@ package backend
 
 import (
 	"errors"
+	"fmt"
 	"gorm.io/gorm"
 	"net/http"
 	"time"
@@ -21,6 +22,7 @@ func RegisterSetupRoutes(router *gin.Engine) {
 
 func addBus(c *gin.Context) {
 	var bus Bus
+	fmt.Printf("Bus details: %+v\n", bus)
 	if err := c.ShouldBindJSON(&bus); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": err.Error()})
 		return
@@ -35,6 +37,7 @@ func addBus(c *gin.Context) {
 	}
 
 	if err := insertBus(&bus); err != nil {
+		fmt.Printf("44444444")
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "数据库写入失败"})
 	}
 	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "添加成功"})
@@ -52,6 +55,9 @@ func removeBus(c *gin.Context) {
 
 func insertBus(bus *Bus) error {
 	result := db.Create(bus)
+	if result.Error != nil {
+		fmt.Println("Error inserting bus:", result.Error)
+	}
 	return result.Error
 }
 
