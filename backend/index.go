@@ -50,14 +50,17 @@ func queryAll(c *gin.Context) {
 	var busType string
 	if reqData.UserType == "学生" {
 		busType = "师生车"
+		result := db.Where("date =? AND busType LIKE?", queryDate, "%"+busType+"%").Find(&buses)
+		if result.Error != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "查询失败"})
+			return
+		}
 	} else {
-		busType = "教职工车"
-	}
-
-	result := db.Where("date =? AND busType LIKE?", queryDate, "%"+busType+"%").Find(&buses)
-	if result.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "查询失败"})
-		return
+		result := db.Where("date =?", queryDate).Find(&buses)
+		if result.Error != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "查询失败"})
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, buses)
