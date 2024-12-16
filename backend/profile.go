@@ -102,7 +102,8 @@ func changePassword(c *gin.Context) {
 		return
 	}
 	if shaEncode(changeRequest.OriginPassword) != queriedUser.Password {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "passwordWrong"})
+		c.JSON(http.StatusBadRequest, gin.H{"status": "passwordWrong", "message": "原密码错误"})
+		return
 	}
 	queriedUser.Password = shaEncode(changeRequest.NewPassword)
 	if err = db.Save(&queriedUser).Error; err != nil {

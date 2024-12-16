@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -27,7 +28,7 @@ func addBus(c *gin.Context) {
 		Date        string `gorm:"column:date" json:"date"`
 		Time        string `gorm:"column:time" json:"time"`
 		Plate       string `gorm:"column:plate" json:"plate"`
-		TotalSeats  int    `gorm:"column:total_seats" json:"totalseats"`
+		TotalSeats  string `gorm:"column:total_seats" json:"totalseats"`
 	}
 
 	if err := c.ShouldBindJSON(&requestBus); err != nil {
@@ -46,8 +47,16 @@ func addBus(c *gin.Context) {
 	bus.Date = busDate
 	bus.Time = requestBus.Time
 	bus.Plate = requestBus.Plate
-	bus.TotalSeats = requestBus.TotalSeats
-	bus.AvailableSeats = requestBus.TotalSeats
+	bus.TotalSeats, err = strconv.Atoi(requestBus.TotalSeats)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail"})
+		return
+	}
+	bus.AvailableSeats, err = strconv.Atoi(requestBus.TotalSeats)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail"})
+		return
+	}
 
 	if bus.BusType != "师生车" && bus.BusType != "教职工车" {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "班车类型错误！仅限为师生车或教职工车"})
@@ -108,7 +117,7 @@ func initPasswordWithUserID(c *gin.Context) {
 	}
 	result := db.Where("userId =?", user.UserID).Take(&user)
 	if result.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail"})
+		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "插入用户userID与已有userID冲突"})
 		return
 	}
 	// 初始密码123456Aa
