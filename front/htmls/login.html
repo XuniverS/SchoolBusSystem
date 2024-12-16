@@ -85,7 +85,7 @@
             <form id="myForm">
                 <div class="input-icon">
                     <img src="../img/username-icon.png" alt="User Icon">
-                    <input type="text" id="username" name="username" placeholder="请输入学号/工号" required>
+                    <input type="text" id="username" name="username" placeholder="请输入学工号/用户名" required>
                 </div>
                 <div class="input-icon">
                     <img src="../img/password-icon.png" alt="Password Icon">
@@ -112,7 +112,7 @@
         <script>
             url = '/user';
             function forgetPassword() {
-                alert("请联系管理员 admin@uestc.com");
+                alert("请联系管理员 admin@school.com");
             }
 
             // 存储初始化
@@ -139,7 +139,9 @@
                 .then(response => {
                     // 检查响应状态是否成功
                     if (!response.ok) {
-                        throw new Error(response.json().message);
+                        return response.json().then(err => {
+                            throw new Error(err.message); // 抛出错误
+                        });
                     }
                     return response.json(); // 解析JSON数据
                 })
