@@ -23,27 +23,6 @@ func (a AnyTime) Match(v driver.Value) bool {
 	return ok
 }
 
-// // SetupMockDB 和 Gin 路由
-//
-//	func SetupMockDB() (*gorm.DB, sqlmock.Sqlmock) {
-//		mockDB, mock, err := sqlmock.New()
-//		if err != nil {
-//			t.Fatalf("Failed to create mock database: %v", err)
-//		}
-//		defer mockDB.Close()
-//
-//		// 模拟 SELECT VERSION() 查询（gourm 会执行这个查询来检查数据库连接）
-//		mock.ExpectQuery("SELECT VERSION()").
-//			WillReturnRows(sqlmock.NewRows([]string{"Version"}).AddRow("5.7.33"))
-//
-//		// 使用 gorm.Open 配合 sqlmock 模拟数据库连接
-//		gormDB, err := gorm.Open(mysql.New(mysql.Config{Conn: mockDB}), &gorm.Config{})
-//		if err != nil {
-//			t.Fatalf("Failed to open gorm DB: %v", err)
-//		}
-//
-//		return gormDB, mock
-//	}
 func TestQueryAll(t *testing.T) {
 	// 使用 sqlmock 创建一个 mock 数据库连接
 	mockDB, mock, err := sqlmock.New()
@@ -162,7 +141,7 @@ func TestBook(t *testing.T) {
 
 func TestPayed(t *testing.T) {
 	// 使用 sqlmock 创建一个 mock 数据库连接
-	mockDB, mock, err := sqlmock.New()
+	mockDB, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 	if err != nil {
 		t.Fatalf("Failed to create mock database: %v", err)
 	}
@@ -183,23 +162,42 @@ func TestPayed(t *testing.T) {
 	router := gin.Default()
 	router.POST("/index/payed", payed)
 
+	busss := Bus{
+		Origin:         "",
+		Destination:    "",
+		BusType:        "",
+		AvailableSeats: 9,
+	}
+	/*bookinggg := Booking{
+		UserId: "123",
+		BusId:  1,
+		Status: "已预约",
+	}*/
 	// 设置 mock 查询行为，模拟班车信息
 	rows := sqlmock.NewRows([]string{"busId", "available_seats"}).
 		AddRow(1, 10)
 
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `buses` WHERE busId =? LIMIT ?")).
+	mock.ExpectQuery("SELECT * FROM `buses` WHERE busId =? LIMIT ?").
 		WithArgs(1, 1).
 		WillReturnRows(rows)
-	var busss Bus
-	busss.BusId = 1
 	mock.ExpectBegin()
 	// 模拟更新操作
-	mock.ExpectExec(regexp.QuoteMeta("UPDATE `buses` SET origin=?,destination=?,busType=?,date=?,time=?,plate=?,total_seats=?,available_seats=?,created_at=? WHERE busId= ?")).
+	mock.ExpectExec("UPDATE `buses` SET `origin`=?,`destination`=?,`busType`=?,`date`=?,`time`=?,`plate`=?,`total_seats`=?,`available_seats`=?,`created_at`=? WHERE `busId` = ?").
 		WithArgs(busss.Origin, busss.Destination, busss.BusType, busss.Date, busss.Time, busss.Plate, busss.TotalSeats, 9, busss.CreatedAt, 1).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectCommit()
+	mock.ExpectBegin()                                                                                   // 开始事务
+	mock.ExpectExec("INSERT INTO `bookings` (`userId`,`busId`,`status`,`created_at`) VALUES (?,?,?,?)"). // 模拟插入数据
+														WithArgs("123", 1, "已预约", time.Now().Truncate(time.Second)).
+														WillReturnResult(sqlmock.NewResult(1, 1)) // 返回影响的行数
+	mock.ExpectCommit()                                                                                            // 提交事务
+	mock.ExpectBegin()                                                                                             // 开始事务
+	mock.ExpectExec("UPDATE `bookings` SET `userId`=?,`busId`=?,`status`=?,`created_at`=? WHERE `bookingId` = ?"). // 模拟插入数据
+															WithArgs("123", 1, "已预约", time.Now().Truncate(time.Second), 1).
+															WillReturnResult(sqlmock.NewResult(1, 1)) // 返回影响的行数
+	mock.ExpectCommit() // 提交事务
 	// 准备请求数据
-	reqBody := `{"userid": "user1", "busid": 1}`
+	reqBody := `{"userid": "123", "busid": 1}`
 	req := httptest.NewRequest(http.MethodPost, "/index/payed", strings.NewReader(reqBody))
 	req.Header.Set("Content-Type", "application/json")
 
@@ -214,49 +212,79 @@ func TestPayed(t *testing.T) {
 	assert.Contains(t, rec.Body.String(), `"status":"success"`)
 }
 
-//
-//func TestUnbook(t *testing.T) {
-//	// 创建 SQL Mock 和 Gin 路由
-//	db, mock := SetupMockDB()
-//	defer db.Close()
-//
-//	// 创建 Gin 路由实例
-//	router := gin.Default()
-//	RegisterIndexModule(router)
-//
-//	// 设置 mock 查询行为
-//	rows := sqlmock.NewRows([]string{"userId", "busId", "status"}).
-//		AddRow("user1", 1, "已预约")
-//
-//	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `bookings` WHERE `userId` = ? AND `busId` = ?")).
-//		WithArgs("user1", 1).
-//		WillReturnRows(rows)
-//
-//	// 模拟更新操作
-//	mock.ExpectExec(regexp.QuoteMeta("UPDATE `bookings` SET `status` = ?")).
-//		WithArgs("已取消").
-//		WillReturnResult(sqlmock.NewResult(1, 1))
-//
-//	// 模拟班车座位数更新
-//	mock.ExpectExec(regexp.QuoteMeta("UPDATE `buses` SET `availableSeats` = ?")).
-//		WithArgs(11).
-//		WillReturnResult(sqlmock.NewResult(1, 1))
-//
-//	// 准备请求数据
-//	reqBody := `{"userid": "user1", "busid": 1}`
-//	req := httptest.NewRequest(http.MethodPost, "/index/unbook", strings.NewReader(reqBody))
-//	req.Header.Set("Content-Type", "application/json")
-//
-//	// 创建响应记录器
-//	rec := httptest.NewRecorder()
-//
-//	// 调用 unbook 函数
-//	router.ServeHTTP(rec, req)
-//
-//	// 断言结果
-//	assert.Equal(t, http.StatusOK, rec.Code)
-//	assert.Contains(t, rec.Body.String(), `"status":"success"`)
-//}
+func TestUnbook(t *testing.T) {
+	mockDB, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+	if err != nil {
+		t.Fatalf("Failed to create mock database: %v", err)
+	}
+	defer mockDB.Close()
+
+	// 模拟 SELECT VERSION() 查询（gourm 会执行这个查询来检查数据库连接）
+	mock.ExpectQuery("SELECT VERSION()").
+		WillReturnRows(sqlmock.NewRows([]string{"Version"}).AddRow("5.7.33"))
+
+	// 使用 gorm.Open 配合 sqlmock 模拟数据库连接
+	gormDB, err := gorm.Open(mysql.New(mysql.Config{Conn: mockDB}), &gorm.Config{})
+	if err != nil {
+		t.Fatalf("Failed to open gorm DB: %v", err)
+	}
+	db = gormDB // 将 db 赋值为 mock gormDB
+
+	// 创建 Gin 路由实例
+	router := gin.Default()
+	router.POST("/index/unbook", unbook)
+
+	// 设置 mock 查询行为
+	rows := sqlmock.NewRows([]string{"userId", "busId", "status"}).
+		AddRow("user1", 1, "已预约")
+
+	mock.ExpectQuery("SELECT * FROM `bookings` WHERE userId =? AND busId =? LIMIT ?").
+		WithArgs("user1", 1, 1).
+		WillReturnRows(rows)
+	rows = sqlmock.NewRows([]string{"userId", "busId", "status"}).
+		AddRow("user1", 1, "已预约")
+	mock.ExpectQuery("SELECT * FROM `bookings` WHERE userId =? AND busId =? AND status =? LIMIT ?").
+		WithArgs("user1", 1, "已预约", 1).
+		WillReturnRows(rows)
+
+	// 模拟更新操作
+	mock.ExpectBegin()
+	mock.ExpectExec("INSERT INTO `bookings` (`userId`,`busId`,`status`,`created_at`) VALUES (?,?,?,?)").
+		WithArgs("user1", 1, "已取消", time.Now().Truncate(time.Second)).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectCommit()
+	mock.ExpectQuery("SELECT * FROM `buses` WHERE busId =? LIMIT ?").
+		WithArgs(1, 1).
+		WillReturnRows(sqlmock.NewRows([]string{"busId", "available_seats"}).
+			AddRow(1, 9))
+	mock.ExpectBegin()
+	// 模拟班车座位数更新
+	busss := Bus{
+		Origin:         "",
+		Destination:    "",
+		BusType:        "",
+		AvailableSeats: 9,
+	}
+	mock.ExpectExec("UPDATE `buses` SET `origin`=?,`destination`=?,`busType`=?,`date`=?,`time`=?,`plate`=?,`total_seats`=?,`available_seats`=?,`created_at`=? WHERE `busId` = ?").
+		WithArgs(busss.Origin, busss.Destination, busss.BusType, busss.Date, busss.Time, busss.Plate, busss.TotalSeats, 10, busss.CreatedAt, 1).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectCommit()
+
+	// 准备请求数据
+	reqBody := `{"userid": "user1", "busid": 1}`
+	req := httptest.NewRequest(http.MethodPost, "/index/unbook", strings.NewReader(reqBody))
+	req.Header.Set("Content-Type", "application/json")
+
+	// 创建响应记录器
+	rec := httptest.NewRecorder()
+
+	// 调用 unbook 函数
+	router.ServeHTTP(rec, req)
+
+	// 断言结果
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Contains(t, rec.Body.String(), `"status":"success"`)
+}
 
 func TestQueryBooked(t *testing.T) {
 	// 使用 sqlmock 创建一个 mock 数据库连接

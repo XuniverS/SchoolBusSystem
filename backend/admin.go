@@ -48,6 +48,7 @@ func addBus(c *gin.Context) {
 	bus.Time = requestBus.Time
 	bus.Plate = requestBus.Plate
 	bus.TotalSeats = requestBus.TotalSeats
+	bus.CreatedAt = time.Now().Truncate(time.Second)
 
 	if bus.BusType != "师生车" && bus.BusType != "教职工车" {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "班车类型错误！仅限为师生车或教职工车"})

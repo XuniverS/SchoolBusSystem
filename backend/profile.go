@@ -2,6 +2,7 @@ package backend
 
 import (
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"net/http"
@@ -66,7 +67,6 @@ func submitUserInfo(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "fail"})
 		return
 	}
-
 	if user.UserID == "" || user.UserName == "" || user.Email == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Missing required fields"})
 		return
@@ -102,10 +102,12 @@ func changePassword(c *gin.Context) {
 		return
 	}
 	if shaEncode(changeRequest.OriginPassword) != queriedUser.Password {
+		fmt.Printf("%s     %s", queriedUser.Password, shaEncode(changeRequest.OriginPassword))
 		c.JSON(http.StatusBadRequest, gin.H{"status": "passwordWrong"})
 	}
 	queriedUser.Password = changeRequest.NewPassword
 	if err = db.Save(&queriedUser).Error; err != nil {
+		fmt.Printf("222222222")
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "Failed to change passwd"})
 		return
 	}

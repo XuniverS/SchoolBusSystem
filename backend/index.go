@@ -119,10 +119,11 @@ func payed(c *gin.Context) {
 		return
 	}
 
-	/*newBooking := Booking{
-		UserId: reqData.UserId,
-		BusId:  reqData.BusId,
-		Status: "已预约",
+	newBooking := Booking{
+		UserId:    reqData.UserId,
+		BusId:     reqData.BusId,
+		Status:    "已预约",
+		CreatedAt: time.Now().Truncate(time.Second),
 	}
 	if err := insertBooking(&newBooking); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "预约失败"})
@@ -133,7 +134,7 @@ func payed(c *gin.Context) {
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "更新预约记录状态失败"})
 		return
-	}*/
+	}
 
 	c.JSON(http.StatusOK, gin.H{"status": "success"})
 }
@@ -162,6 +163,7 @@ func unbook(c *gin.Context) {
 	}
 
 	booking.Status = "已取消"
+	booking.CreatedAt = time.Now().Truncate(time.Second)
 	result = db.Save(&booking)
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "更新预约记录状态失败"})

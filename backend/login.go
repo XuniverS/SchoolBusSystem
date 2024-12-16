@@ -1,7 +1,8 @@
 package backend
 
 import (
-	"fmt"
+	"crypto/sha256"
+	"encoding/hex"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -24,7 +25,6 @@ func userLogin(c *gin.Context) {
 	}
 	queriedUser, err := queryUser(&user)
 	if err != nil {
-		fmt.Printf("queriedUser\n")
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail"})
 		return
 	}
@@ -80,17 +80,7 @@ func insertUser(user *User) error {
 	return result.Error
 }
 
-// 模拟的 shaEncode 函数
-func shaEncode(password string) string {
-	if password == "123456Aa" {
-		return "hashed_password" // 模拟加密后的密码
-	}
-	return ""
-}
-
-/*
 func shaEncode(p string) string {
 	hashBytes := sha256.Sum256([]byte(p))
 	return hex.EncodeToString(hashBytes[:])
 }
-*/

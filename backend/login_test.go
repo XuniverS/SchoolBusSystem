@@ -14,16 +14,6 @@ import (
 	"testing"
 )
 
-// queryUser 函数
-/*func queryUser(user *User) (*User, error) {
-	var queriedUser User
-	result := db.Where("username = ?", user.UserName).Take(&queriedUser)
-	if result.Error != nil {
-		return &User{}, result.Error
-	}
-	return &queriedUser, nil
-}*/
-
 func TestQueryUser(t *testing.T) {
 	// 使用 sqlmock 创建一个 mock 数据库连接
 	mockDB, mock, err := sqlmock.New()
@@ -74,49 +64,6 @@ func TestQueryUser(t *testing.T) {
 	}
 }
 
-// queryUser 函数，模拟数据库查询
-/*func queryUser(user *User) (*User, error) {
-	var queriedUser User
-	// 这里用 db 的 Where 和 Take 方法模拟查询
-	result := db.Where("username = ?", user.UserName).Take(&queriedUser)
-	if result.Error != nil {
-		return &User{}, result.Error
-	}
-	return &queriedUser, nil
-}*/
-
-/*
-// 模拟的 shaEncode 函数
-func shaEncode(password string) string {
-	if password == "123456Aa" {
-		return "hashed_password" // 模拟加密后的密码
-	}
-	return ""
-}
-
-// 模拟的 updateUserIsFirstLogin 函数
-func updateUserIsFirstLogin(user *User) int {
-	if user.Is_first_login {
-		return 1
-	}
-	return 0
-}
-
-// 模拟的 queryUser 函数
-func queryUser(user *User) (*User, error) {
-	// 这里返回一个固定的用户，模拟数据库查询
-	if user.UserName == "user123" {
-		return &User{
-			UserID:         "1",
-			UserType:       "admin",
-			Password:       "hashed_password",
-			Is_first_login: true,
-			CreatedTime:    time.Now(),
-		}, nil
-	}
-	return nil, errors.New("user not found")
-}
-*/
 // 单元测试
 func TestUserLogin(t *testing.T) {
 	// 初始化 Gin engine
@@ -153,7 +100,7 @@ func TestUserLogin(t *testing.T) {
 
 		// 定义期望的查询 SQL 及其结果
 		rows := sqlmock.NewRows([]string{"userId", "userType", "username", "password", "Is_first_login"}).
-			AddRow("1", "admin", "user123", "hashed_password", "1")
+			AddRow("1", "admin", "user123", "b17e1e0450dac425ea318253f6f852972d69731d6c7499c001468b695b6da219", "1")
 
 		// 模拟查询操作
 		mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `users` WHERE username = ? LIMIT ?")).
@@ -193,73 +140,4 @@ func TestUserLogin(t *testing.T) {
 		assert.Equal(t, "admin", response["usertype"])
 		assert.Equal(t, float64(1), response["isfirstlogin"])
 	})
-
-	/*// 错误的密码测试
-	t.Run("Invalid Password", func(t *testing.T) {
-		input := map[string]string{
-			"username": "user123",
-			"password": "wrongpassword",
-		}
-
-		jsonValue, _ := json.Marshal(input)
-		req, _ := http.NewRequest("POST", "/login", bytes.NewReader(jsonValue))
-		w := httptest.NewRecorder()
-
-		r.ServeHTTP(w, req)
-
-		// 断言响应状态码为 400
-		assert.Equal(t, http.StatusBadRequest, w.Code)
-
-		var response map[string]interface{}
-		err := json.Unmarshal(w.Body.Bytes(), &response)
-		assert.NoError(t, err)
-
-		assert.Equal(t, "fail", response["status"])
-	})
-
-	// 用户不存在测试
-	t.Run("User Not Found", func(t *testing.T) {
-		input := map[string]string{
-			"username": "nonexistentUser",
-			"password": "123456Aa",
-		}
-
-		jsonValue, _ := json.Marshal(input)
-		req, _ := http.NewRequest("POST", "/login", bytes.NewReader(jsonValue))
-		w := httptest.NewRecorder()
-
-		r.ServeHTTP(w, req)
-
-		// 断言响应状态码为 500
-		assert.Equal(t, http.StatusInternalServerError, w.Code)
-
-		var response map[string]interface{}
-		err := json.Unmarshal(w.Body.Bytes(), &response)
-		assert.NoError(t, err)
-
-		assert.Equal(t, "fail", response["status"])
-	})
-
-	// 用户名为空测试
-	t.Run("Empty Username", func(t *testing.T) {
-		input := map[string]string{
-			"username": "",
-			"password": "123456Aa",
-		}
-
-		jsonValue, _ := json.Marshal(input)
-		req, _ := http.NewRequest("POST", "/login", bytes.NewReader(jsonValue))
-		w := httptest.NewRecorder()
-
-		r.ServeHTTP(w, req)
-
-		// 断言响应状态码为 500
-		assert.Equal(t, http.StatusInternalServerError, w.Code)
-
-		var response map[string]interface{}
-		err := json.Unmarshal(w.Body.Bytes(), &response)
-		assert.NoError(t, err)
-
-		assert.Equal(t, "fail", response["status"])
-	})*/
 }
