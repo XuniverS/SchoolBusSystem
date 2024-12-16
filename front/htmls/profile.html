@@ -292,7 +292,13 @@
                 },
                 body: json
             })
-            .then(response => response.json())
+            .then(response => {
+                // 检查响应状态是否成功
+                if (!response.ok) {
+                    throw new Error(response.json().message);
+                }
+                return response.json(); // 解析JSON数据
+            })
             .then(data => {
                 // 处理后端返回的数据
                 displayProfile(data);
@@ -337,7 +343,13 @@
                 },
                 body: json
             })
-            .then(response => response.json())
+            .then(response => {
+                // 检查响应状态是否成功
+                if (!response.ok) {
+                    throw new Error(response.json().message);
+                }
+                return response.json(); // 解析JSON数据
+            })
             .then(data => {
                 // 处理后端返回的数据
                 var status = data.status;
@@ -380,7 +392,13 @@
                 },
                 body: json
             })
-            .then(response => response.json())
+            .then(response => {
+                // 检查响应状态是否成功
+                if (!response.ok) {
+                    throw new Error(response.json().message);
+                }
+                return response.json(); // 解析JSON数据
+            })
             .then(data => {
                 // 处理后端返回的数据
                 var status = data.status;
