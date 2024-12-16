@@ -2,9 +2,13 @@ package backend
 
 import (
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 	"net/http"
+	"sync"
 	"time"
 )
+
+var mu = &sync.Mutex{}
 
 func RegisterIndexModule(router *gin.Engine) {
 	indexRouter := router.Group("/index")
@@ -101,6 +105,10 @@ func payed(c *gin.Context) {
 		return
 	}
 	var bus Bus
+
+	mu.Lock()
+	defer mu.Unlock()
+
 	result := db.Where("busId =?", reqData.BusId).Take(&bus)
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "查询班车信息失败"})
@@ -131,6 +139,7 @@ func payed(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"status": "success"})
 }
+
 func unbook(c *gin.Context) {
 	var reqData struct {
 		UserId string `json:"userId"`
@@ -278,4 +287,10 @@ func insertBooking(booking *Booking) error {
 func updateBus(bus *Bus) error {
 	result := db.Save(bus)
 	return result.Error
+}
+
+func handleError(tx *gorm.DB, c *gin.Context, err error, statusCode int, message string) {
+	tx.Rollback()
+	c.JSON(statusCode, gin.H{"status": "fail", "message": message})
+	return
 }
