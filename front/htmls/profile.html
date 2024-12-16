@@ -295,7 +295,9 @@
             .then(response => {
                 // 检查响应状态是否成功
                 if (!response.ok) {
-                    throw new Error(response.json().message);
+                    return response.json().then(err => {
+                        throw new Error(err.message); // 抛出错误
+                    });
                 }
                 return response.json(); // 解析JSON数据
             })
@@ -346,7 +348,9 @@
             .then(response => {
                 // 检查响应状态是否成功
                 if (!response.ok) {
-                    throw new Error(response.json().message);
+                    return response.json().then(err => {
+                        throw new Error(err.message); // 抛出错误
+                    });
                 }
                 return response.json(); // 解析JSON数据
             })
@@ -395,7 +399,9 @@
             .then(response => {
                 // 检查响应状态是否成功
                 if (!response.ok) {
-                    throw new Error(response.json().message);
+                    return response.json().then(err => {
+                        throw new Error(err.message); // 抛出错误
+                    });
                 }
                 return response.json(); // 解析JSON数据
             })

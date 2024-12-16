@@ -459,7 +459,9 @@
             .then(response => {
                 // 检查响应状态是否成功
                 if (!response.ok) {
-                    throw new Error(response.json().message);
+                    return response.json().then(err => {
+                        throw new Error(err.message); // 抛出错误
+                    });
                 }
                 return response.json(); // 解析JSON数据
             })
@@ -477,19 +479,22 @@
         function displaySchedules(data, date) {
             const busSchedulesContainer = document.querySelector('.bus-schedule-cards');
             busSchedulesContainer.innerHTML = ''; // 清空现有班次信息
-    
-            var cnt = 0;
 
-            data.forEach(schedule => {
-                
-                let busTime = new Date(date + " " + schedule.time);
-                let now = new Date();
-                if (busTime - now < 0) ; // 已经过了出发时间
-                else {
-                    cnt++;
-                    const scheduleCard = document.createElement('div');
-                    scheduleCard.className = 'bus-schedule-card';
-                    scheduleCard.innerHTML = `
+            if (data == null || data.length == 0) {
+                const scheduleCard = document.createElement('div');
+                scheduleCard.innerHTML = `
+                    <p>当天没有可预约班次</p>
+                `;
+                busSchedulesContainer.appendChild(scheduleCard);
+            } else {
+                data.forEach(schedule => {
+                    let busTime = new Date(date + " " + schedule.time);
+                    let now = new Date();
+                    if (busTime - now < 0) ; // 已经过了出发时间
+                    else {
+                        const scheduleCard = document.createElement('div');
+                        scheduleCard.className = 'bus-schedule-card';
+                        scheduleCard.innerHTML = `
                         <h3>${schedule.bustype}</h3>
                         <p>出发地：${schedule.origin}</p>
                         <p>目的地：${schedule.destination}</p>
@@ -497,16 +502,9 @@
                         <p id="seatsInfo" class="warn-text">余座：${schedule.availableseats}</p>
                         <button onclick="book(${schedule.busid})">预约</button>
                     `;
-                    busSchedulesContainer.appendChild(scheduleCard);
-                }
-            });
-
-            if (cnt == 0) {
-                const scheduleCard = document.createElement('div');
-                scheduleCard.innerHTML = `
-                    <p>当天没有可预约班次</p>
-                `;
-                busSchedulesContainer.appendChild(scheduleCard);
+                        busSchedulesContainer.appendChild(scheduleCard);
+                    }
+                });
             }
         }
 
@@ -527,7 +525,9 @@
             .then(response => {
                 // 检查响应状态是否成功
                 if (!response.ok) {
-                    throw new Error(response.json().message);
+                    return response.json().then(err => {
+                        throw new Error(err.message); // 抛出错误
+                    });
                 }
                 return response.json(); // 解析JSON数据
             })
@@ -578,7 +578,9 @@
             .then(response => {
                 // 检查响应状态是否成功
                 if (!response.ok) {
-                    throw new Error(response.json().message);
+                    return response.json().then(err => {
+                        throw new Error(err.message); // 抛出错误
+                    });
                 }
                 return response.json(); // 解析JSON数据
             })
@@ -622,7 +624,9 @@
             .then(response => {
                 // 检查响应状态是否成功
                 if (!response.ok) {
-                    throw new Error(response.json().message);
+                    return response.json().then(err => {
+                        throw new Error(err.message); // 抛出错误
+                    });
                 }
                 return response.json(); // 解析JSON数据
             })
@@ -683,7 +687,9 @@
             .then(response => {
                 // 检查响应状态是否成功
                 if (!response.ok) {
-                    throw new Error(response.json().message);
+                    return response.json().then(err => {
+                        throw new Error(err.message); // 抛出错误
+                    });
                 }
                 return response.json(); // 解析JSON数据
             })
@@ -720,7 +726,9 @@
             .then(response => {
                 // 检查响应状态是否成功
                 if (!response.ok) {
-                    throw new Error(response.json().message);
+                    return response.json().then(err => {
+                        throw new Error(err.message); // 抛出错误
+                    });
                 }
                 return response.json(); // 解析JSON数据
             })
@@ -737,14 +745,19 @@
         function displayFinished(data) {
             const busSchedulesContainer = document.querySelector('.order-cards');
             busSchedulesContainer.innerHTML = ''; // 清空现有班次信息
-            
-            var cnt = 0;
 
-            data.forEach(order => {
-                cnt++;
-                const orderCard = document.createElement('div');
-                orderCard.className = 'bus-schedule-card';
-                orderCard.innerHTML = `
+            // 没有历史订单
+            if (data == null || data.length == 0) {
+                const scheduleCard = document.createElement('div');
+                scheduleCard.innerHTML = `
+                    <p>没有历史记录</p>
+                `;
+                busSchedulesContainer.appendChild(orderCard);
+            } else {
+                data.forEach(order => {
+                    const orderCard = document.createElement('div');
+                    orderCard.className = 'bus-schedule-card';
+                    orderCard.innerHTML = `
                     <h3>${order.bustype}</h3>
                     <h4>${order.status == 'finished' ? "已完成" : "已取消"}</h4>
                     <br>
@@ -754,17 +767,8 @@
                     <p>车牌：${order.plate}</p>
                     <p>日期：${order.date}</p>
                 `;
-                busSchedulesContainer.appendChild(orderCard);
-            });
-
-            
-            // 没有历史订单
-            if (cnt == 0 || data == null || data.length == 0) {
-                const scheduleCard = document.createElement('div');
-                scheduleCard.innerHTML = `
-                    <p>没有历史记录</p>
-                `;
-                busSchedulesContainer.appendChild(orderCard);
+                    busSchedulesContainer.appendChild(orderCard);
+                });
             }
         }
     </script>

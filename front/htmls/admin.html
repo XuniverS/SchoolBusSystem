@@ -466,7 +466,9 @@
             .then(response => {
                 // 检查响应状态是否成功
                 if (!response.ok) {
-                    throw new Error(response.json().message);
+                    return response.json().then(err => {
+                        throw new Error(err.message); // 抛出错误
+                    });
                 }
                 return response.json(); // 解析JSON数据
             })
@@ -502,7 +504,9 @@
             .then(response => {
                 // 检查响应状态是否成功
                 if (!response.ok) {
-                    throw new Error(response.json().message);
+                    return response.json().then(err => {
+                        throw new Error(err.message); // 抛出错误
+                    });
                 }
                 return response.json(); // 解析JSON数据
             })
@@ -516,17 +520,21 @@
         }
 
         // 展示班次信息
-        function displaySchedules(busSchedules) {
+        function displaySchedules(data) {
             const busSchedulesContainer = document.querySelector('.bus-schedule-cards');
             busSchedulesContainer.innerHTML = ''; // 清空现有班次信息
-    
-            var cnt = 0;
 
-            busSchedules.forEach(schedule => {
-                cnt++;
+            if (data == null || data.length == 0) {
                 const scheduleCard = document.createElement('div');
-                scheduleCard.className = 'bus-schedule-card';
                 scheduleCard.innerHTML = `
+                    <p>没有可预约班次</p>
+                `;
+                busSchedulesContainer.appendChild(scheduleCard);
+            } else {
+                data.forEach(schedule => {
+                    const scheduleCard = document.createElement('div');
+                    scheduleCard.className = 'bus-schedule-card';
+                    scheduleCard.innerHTML = `
                     <h3>${schedule.bustype}</h3>
                     <p>出发地：${schedule.origin}</p>
                     <p>目的地：${schedule.destination}</p>
@@ -535,15 +543,8 @@
                     <p>车牌：${schedule.plate}</p>
                     <button id = "delete-button" class = "delete-button" onclick="deleteBus(${schedule.busid})" >删除</button>
                 `;
-                busSchedulesContainer.appendChild(scheduleCard);
-            });
-
-            if (cnt == 0) {
-                const scheduleCard = document.createElement('div');
-                scheduleCard.innerHTML = `
-                    <p>没有可预约班次</p>
-                `;
-                busSchedulesContainer.appendChild(scheduleCard);
+                    busSchedulesContainer.appendChild(scheduleCard);
+                });
             }
         }
 
@@ -563,7 +564,9 @@
             .then(response => {
                 // 检查响应状态是否成功
                 if (!response.ok) {
-                    throw new Error(response.json().message);
+                    return response.json().then(err => {
+                        throw new Error(err.message); // 抛出错误
+                    });
                 }
                 return response.json(); // 解析JSON数据
             })
@@ -601,7 +604,9 @@
             .then(response => {
                 // 检查响应状态是否成功
                 if (!response.ok) {
-                    throw new Error(response.json().message);
+                    return response.json().then(err => {
+                        throw new Error(err.message); // 抛出错误
+                    });
                 }
                 return response.json(); // 解析JSON数据
             })
@@ -648,7 +653,9 @@
             .then(response => {
                 // 检查响应状态是否成功
                 if (!response.ok) {
-                    throw new Error(response.json().message);
+                    return response.json().then(err => {
+                        throw new Error(err.message); // 抛出错误
+                    });
                 }
                 return response.json(); // 解析JSON数据
             })
@@ -705,7 +712,9 @@
             .then(response => {
                 // 检查响应状态是否成功
                 if (!response.ok) {
-                    throw new Error(response.json().message);
+                    return response.json().then(err => {
+                        throw new Error(err.message); // 抛出错误
+                    });
                 }
                 return response.json(); // 解析JSON数据
             })
@@ -758,7 +767,9 @@
             .then(response => {
                 // 检查响应状态是否成功
                 if (!response.ok) {
-                    throw new Error(response.json().message);
+                    return response.json().then(err => {
+                        throw new Error(err.message); // 抛出错误
+                    });
                 }
                 return response.json(); // 解析JSON数据
             })
