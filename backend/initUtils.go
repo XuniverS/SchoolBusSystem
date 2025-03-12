@@ -43,7 +43,7 @@ func InitDatabase() {
 	var err error
 
 	db, err = gorm.Open(mysql.New(mysql.Config{
-		DSN:                       "root:C0137yx.@tcp(127.0.0.1:3306)/BusBookingSystem?parseTime=true",
+		DSN:                       "@tcp(127.0.0.1:3306)/BusBookingSystem?parseTime=true",
 		SkipInitializeWithVersion: true,
 	}), &gorm.Config{})
 	if err != nil {
